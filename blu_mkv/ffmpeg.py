@@ -4,7 +4,8 @@ import subprocess
 class FfprobeController:
     """Interface with Ffprobe command-line interface."""
 
-    def get_unformatted_bluray_playlists(self, disc_path):
+    @staticmethod
+    def get_unformatted_bluray_playlists(disc_path):
         """Analyze Bluray disc in search of its playlists, and returns
         the unformatted Ffprobe's output.
 

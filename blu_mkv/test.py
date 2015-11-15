@@ -2,7 +2,8 @@ import textwrap
 
 
 class FfprobeStubController:
-    def get_unformatted_bluray_playlists(self, disc_path):
+    @staticmethod
+    def get_unformatted_bluray_playlists(disc_path):
         return textwrap.dedent("""\
         [bluray @ 0x555da3c70e60] 3 usable playlists:
         [bluray @ 0x555da3c70e60] playlist 00028.mpls (0:07:42)

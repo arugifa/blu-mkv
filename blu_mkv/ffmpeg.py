@@ -12,8 +12,9 @@ class FfprobeController:
         In the output, lines relative to playlists look like:
         "[bluray @ 0x5596c189ee60] playlist 00419.mpls (2:23:11)"
 
-        :param disc_path: Bluray disc's path.
-        :return: unformatted Ffprobe's output containing playlists' details.
+        :param str disc_path: Bluray disc's path
+        :return: Unformatted Ffprobe's output containing playlists' details
+        :rtype: str
         """
         return subprocess.check_output([
             'ffprobe',

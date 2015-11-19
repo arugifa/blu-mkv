@@ -1,4 +1,5 @@
 from datetime import timedelta
+from pathlib import Path
 import re
 
 
@@ -37,3 +38,18 @@ class BlurayAnalyzer:
                     seconds=playlist_duration[2]),
             })
         return playlists
+
+    def get_covers(self):
+        """Return covers of the Bluray disc.
+
+        Each cover is a dictionary with the following details:
+        - path: cover's absolute path,
+        - size: cover's size in bytes.
+
+        :return: list of found covers.
+        """
+        covers_path = Path(self.disc_path, 'BDMV/META/DL')
+        return [{
+            'path': str(found_cover),
+            'size': found_cover.stat().st_size,
+        } for found_cover in covers_path.glob('*.jpg')]

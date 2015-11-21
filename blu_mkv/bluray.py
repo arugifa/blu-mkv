@@ -14,7 +14,7 @@ class BlurayAnalyzer:
         self.ffprobe = ffprobe_controller
 
     def get_playlists(self):
-        """Return playlists of the Bluray disc.
+        """Return Bluray disc's playlists by using Ffprobe.
 
         Each playlist is a dictionary with the following details:
         - id: playlist's identifier as a string,
@@ -40,7 +40,7 @@ class BlurayAnalyzer:
         return playlists
 
     def get_covers(self):
-        """Return covers of the Bluray disc.
+        """Return Bluray disc's covers.
 
         Each cover is a dictionary with the following details:
         - path: cover's absolute path,

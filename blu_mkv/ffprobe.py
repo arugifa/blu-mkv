@@ -63,6 +63,29 @@ class FfprobeController(AbstractFfprobeController):
         return self._analyze_bluray_disc(
             disc_path, ffprobe_options, json_output=True)
 
+    def get_bluray_playlist_subtitles_with_frames_count_as_json(
+            self, disc_path, playlist_id):
+        """Return streams' details of a specific Bluray disc's playlist like
+        :meth:`~.get_all_streams_of_bluray_playlist_as_json`, but only for
+        subtitle tracks.
+
+        Subtitles' details contain the number of read frames for each subtitle
+        track, which is especially useful to identify forced subtitles.
+        This is only done for subtitles as this is a slow operation.
+
+        :param str disc_path: Bluray disc's path
+        :param str playlist_id: playlist's identifier
+        :return: Ffprobe's output as a deserialized JSON dictionary.
+        :rtype: dict
+        """
+        ffprobe_options = [
+            '-show_streams',
+            '-select_streams', 's',
+            '-count_frames',
+            '-playlist', playlist_id]
+        return self._analyze_bluray_disc(
+            disc_path, ffprobe_options, json_output=True)
+
     @staticmethod
     def _clean_formatted_output(ffprobe_output):
         """Delete insignificant error messages appearing in ffprobe's output.

@@ -5,13 +5,19 @@ import subprocess
 
 
 class AbstractFfprobeController(metaclass=ABCMeta):
+    def get_default_bluray_playlist(self, disc_path):
+        default_playlist = re.search(
+            r'selected (\d+)\.mpls',
+            self.get_unformatted_bluray_playlists(disc_path))
+        return default_playlist.group(1)
+
     @abstractmethod
     def get_unformatted_bluray_playlists(self, disc_path):
         pass
 
     @abstractmethod
     def get_all_streams_of_bluray_playlist_as_json(
-            self, disc_path, playlid_id=None):
+            self, disc_path, playlid_id):
         pass
 
 
@@ -30,11 +36,10 @@ class FfprobeController(AbstractFfprobeController):
         return self._analyze_bluray_disc(disc_path)
 
     def get_all_streams_of_bluray_playlist_as_json(
-            self, disc_path, playlist_id=None):
-        ffprobe_options = ['-show_streams']
-        if playlist_id is not None:
-            ffprobe_options.extend(['-playlist', playlist_id])
-
+            self, disc_path, playlist_id):
+        ffprobe_options = [
+            '-show_streams',
+            '-playlist', playlist_id]
         return self._analyze_bluray_disc(
             disc_path, ffprobe_options, json_output=True)
 

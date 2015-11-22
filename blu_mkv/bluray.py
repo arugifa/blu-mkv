@@ -6,8 +6,8 @@ import re
 class BlurayAnalyzer:
     """Analyze a Bluray disc by using Ffprobe and Mkvmerge command-line tools.
 
-    :param str disc_path: path of the Bluray disc.
-    :param ffprobe_controller: interface with Ffprobe.
+    :param str disc_path: path of the Bluray disc
+    :param ffprobe_controller: interface with Ffprobe
     """
     def __init__(self, disc_path, ffprobe_controller, mkvmerge_controller):
         self.disc_path = disc_path
@@ -18,11 +18,10 @@ class BlurayAnalyzer:
         """Return Bluray disc's playlists by using Ffprobe.
 
         Each playlist is a dictionary with the following details:
-        - id: playlist's identifier as a string,
-        - duration: playlist's duration, instance of
-                    :class:`datetime.timedelta`.
+        - id: playlist identifier as a string
+        - duration: playlist duration, instance of :class:`datetime.timedelta`
 
-        :return: list of found playlists.
+        :return: list of found playlists
         """
         playlists_details = re.findall(
             r'playlist (\d+)\.mpls \((\d+:\d{2}:\d{2})\)',
@@ -44,10 +43,10 @@ class BlurayAnalyzer:
         """Return Bluray disc's covers.
 
         Each cover is a dictionary with the following details:
-        - path: cover's absolute path,
-        - size: cover's size in bytes.
+        - path: str, cover's absolute path
+        - size: int, cover's size in bytes
 
-        :return: list of found covers.
+        :return: list of found covers
         """
         covers_path = Path(self.disc_path, 'BDMV/META/DL')
         return [{

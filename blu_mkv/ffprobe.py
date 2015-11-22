@@ -75,7 +75,7 @@ class FfprobeController(AbstractFfprobeController):
 
         :param str disc_path: Bluray disc's path
         :param str playlist_id: playlist's identifier
-        :return: Ffprobe's output as a deserialized JSON dictionary.
+        :return: Ffprobe's output as a deserialized JSON dictionary
         :rtype: dict
         """
         ffprobe_options = [
@@ -105,9 +105,9 @@ class FfprobeController(AbstractFfprobeController):
         options.
 
         :param str disc_path: Bluray disc's path
-        :param list ffprobe_options: Ffprobe's options.
-        :param bool json_output: define format of Ffprobe's output.
-        :return: result of the analysis.
+        :param list ffprobe_options: Ffprobe's options
+        :param bool json_output: define format of Ffprobe's output
+        :return: result of the analysis
         :return type: an unformatted string if json_output is false;
                       a dictionary otherwise.
         """

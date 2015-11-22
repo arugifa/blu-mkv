@@ -9,9 +9,10 @@ class BlurayAnalyzer:
     :param str disc_path: path of the Bluray disc.
     :param ffprobe_controller: interface with Ffprobe.
     """
-    def __init__(self, disc_path, ffprobe_controller):
+    def __init__(self, disc_path, ffprobe_controller, mkvmerge_controller):
         self.disc_path = disc_path
         self.ffprobe = ffprobe_controller
+        self.mkvmerge = mkvmerge_controller
 
     def get_playlists(self):
         """Return Bluray disc's playlists by using Ffprobe.

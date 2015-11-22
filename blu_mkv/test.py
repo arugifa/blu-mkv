@@ -1,6 +1,7 @@
 import textwrap
 
 from .ffprobe import AbstractFfprobeController
+from .mkvmerge import AbstractMkvmergeController
 
 
 class StubFfprobeController(AbstractFfprobeController):
@@ -43,3 +44,15 @@ class StubFfprobeController(AbstractFfprobeController):
                 {'index': 5,
                  'codec_type': 'subtitle',
                  'nb_read_frames': '2680'}]}
+
+
+class StubMkvmergeController(AbstractMkvmergeController):
+    def get_all_tracks_of_bluray_playlist(self, disc_path, playlist_id):
+        return textwrap.dedent("""\
+            Track ID 0: video (MPEG-4p10/AVC/h.264) [pixel_dimensions:1920x1080 ts_pid:4113]
+            Track ID 1: audio (DTS-HD Master Audio) [audio_channels:6 audio_sampling_frequency:48000 language:fre ts_pid:4352]
+            Track ID 2: audio (DTS-HD Master Audio) [audio_channels:6 audio_sampling_frequency:48000 language:chi ts_pid:4353]
+            Track ID 3: subtitles (HDMV PGS) [language:fre text_subtitles:1 ts_pid:4608]
+            Track ID 4: subtitles (HDMV PGS) [language:fre text_subtitles:1 ts_pid:4609]
+            Track ID 5: subtitles (HDMV PGS) [language:chi text_subtitles:1 ts_pid:4610]
+            """)

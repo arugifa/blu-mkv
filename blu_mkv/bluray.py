@@ -24,7 +24,7 @@ class BlurayAnalyzer:
         :return: list of found playlists.
         """
         playlists_details = re.findall(
-            r'playlist (\d+).mpls \((\d+:\d{2}:\d{2})\)',
+            r'playlist (\d+)\.mpls \((\d+:\d{2}:\d{2})\)',
             self.ffprobe.get_unformatted_bluray_playlists(self.disc_path))
 
         playlists = list()

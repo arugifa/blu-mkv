@@ -6,6 +6,13 @@ import subprocess
 
 class AbstractFfprobeController(metaclass=ABCMeta):
     def get_default_bluray_playlist(self, disc_path):
+        """Return playlist used by default by Ffprobe to analyze a Bluray disc,
+        when no playlist is specified.
+
+        :param str disc_path: Bluray disc's path
+        :return: the default playlist's ID
+        :rtype: str
+        """
         default_playlist = re.search(
             r'selected (\d+)\.mpls',
             self.get_unformatted_bluray_playlists(disc_path))
@@ -37,6 +44,19 @@ class FfprobeController(AbstractFfprobeController):
 
     def get_all_streams_of_bluray_playlist_as_json(
             self, disc_path, playlist_id):
+        """Return streams' details of a specific Bluray disc's playlist.
+
+        Several details are similar between streams. Otherwise, other ones are
+        specific to codec types. See Ffprobe's documentation for more
+        information.
+
+        :param str disc_path: Bluray disc's path
+        :param str playlist_id: playlist's identifier
+        :return: Ffprobe's output as a deserialized JSON dictionary.
+                 Streams are accessible through the top-level key `streams`,
+                 and consist of a list of dictionaries.
+        :rtype: dict
+        """
         ffprobe_options = [
             '-show_streams',
             '-playlist', playlist_id]

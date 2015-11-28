@@ -24,6 +24,13 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture(
     scope='session',
+    params=[FfprobeController, StubFfprobeController])
+def ffprobe(request):
+    return request.param()
+
+
+@pytest.fixture(
+    scope='session',
     params=[(FfprobeController, MkvmergeController),
             (StubFfprobeController, StubMkvmergeController)])
 def bluray_analyzer(request, bluray_path):

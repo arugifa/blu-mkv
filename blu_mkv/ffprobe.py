@@ -5,45 +5,65 @@ import subprocess
 
 
 class AbstractFfprobeController(metaclass=ABCMeta):
-    def get_default_bluray_playlist(self, disc_path):
-        """Return playlist used by default by Ffprobe to analyze a Bluray disc,
-        when no playlist is specified.
-
-        :param str disc_path: Bluray disc's path
-        :return: the default playlist's ID
-        :rtype: str
-        """
-        default_playlist = re.search(
-            r'selected (\d+)\.mpls',
-            self.get_unformatted_bluray_playlists(disc_path))
-        return default_playlist.group(1)
-
     @abstractmethod
-    def get_unformatted_bluray_playlists(self, disc_path):
+    def get_default_bluray_playlist_number(self, disc_path):
         pass
 
     @abstractmethod
-    def get_all_streams_of_bluray_playlist_as_json(
-            self, disc_path, playlid_id):
+    def get_bluray_playlists(self, disc_path):
+        pass
+
+    @abstractmethod
+    def get_all_bluray_playlist_streams(self, disc_path, playlid_id):
+        pass
+
+    @abstractmethod
+    def get_bluray_playlist_subtitles_with_frames_count(
+            self, disc_path, playlist_id):
         pass
 
 
 class FfprobeController(AbstractFfprobeController):
-    def get_unformatted_bluray_playlists(self, disc_path):
-        """Analyze Bluray disc in search of its playlists, and returns
-        the unformatted Ffprobe's output.
+    def get_default_bluray_playlist_number(self, disc_path):
+        """Return the playlist's number used by default by Ffprobe to analyze
+        a Bluray disc, when no playlist is specified on the command-line.
 
-        In the output, lines relative to playlists look like:
-        "[bluray @ 0x5596c189ee60] playlist 00419.mpls (2:23:11)"
+        The longest playlist is usually returned.
 
         :param str disc_path: Bluray disc's path
-        :return: Unformatted Ffprobe's output containing playlists' details
-        :rtype: str
+        :return: the default playlist's number
+        :rtype: int
         """
-        return self._analyze_bluray_disc(disc_path)
+        # In Ffprobe's output, search a line like:
+        # "[bluray @ 0x555da3c70e60] selected 00419.mpls"
+        default_playlist = re.search(
+            r'selected (\d+)\.mpls',
+            self._analyze_bluray_disc(disc_path))
 
-    def get_all_streams_of_bluray_playlist_as_json(
-            self, disc_path, playlist_id):
+        return int(default_playlist.group(1))
+
+    def get_bluray_playlists(self, disc_path):
+        """Return details of playlists present on a Bluray disc.
+
+        Details are dictionaries with the following keys:
+        - duration: `str`, playlist's duration. For example: "2:23:11".
+
+        :param str disc_path: Bluray disc's path
+        :return: a dictionary of found playlists, with their identifiers
+                 as keys
+        :rtype: dict
+        """
+        # In Ffprobe's output, find lines like:
+        # "[bluray @ 0x555da3c70e60] playlist 00419.mpls (2:23:11)"
+        all_playlists = re.findall(
+            r'playlist (\d+)\.mpls \((\d+:\d{2}:\d{2})\)',
+            self._analyze_bluray_disc(disc_path))
+
+        return {
+            int(playlist[0]): {'duration': playlist[1]}
+            for playlist in all_playlists}
+
+    def get_all_bluray_playlist_streams(self, disc_path, playlist_id):
         """Return streams' details of a specific Bluray disc's playlist.
 
         Several details are similar between streams. Otherwise, other ones are
@@ -51,19 +71,18 @@ class FfprobeController(AbstractFfprobeController):
         information.
 
         :param str disc_path: Bluray disc's path
-        :param str playlist_id: playlist's identifier
-        :return: Ffprobe's output as a deserialized JSON dictionary.
-                 Streams are accessible through the top-level key `streams`,
-                 and consist of a list of dictionaries.
-        :rtype: dict
+        :param int playlist_id: playlist's identifier
+        :return: a list of dictionaries with all streams' details
+        :rtype: list
         """
         ffprobe_options = [
             '-show_streams',
-            '-playlist', playlist_id]
-        return self._analyze_bluray_disc(
-            disc_path, ffprobe_options, json_output=True)
+            '-playlist', str(playlist_id)]
 
-    def get_bluray_playlist_subtitles_with_frames_count_as_json(
+        return self._analyze_bluray_disc(
+            disc_path, ffprobe_options, json_output=True)['streams']
+
+    def get_bluray_playlist_subtitles_with_frames_count(
             self, disc_path, playlist_id):
         """Return streams' details of a specific Bluray disc's playlist like
         :meth:`~.get_all_streams_of_bluray_playlist_as_json`, but only for
@@ -74,17 +93,18 @@ class FfprobeController(AbstractFfprobeController):
         This is only done for subtitles as this is a slow operation.
 
         :param str disc_path: Bluray disc's path
-        :param str playlist_id: playlist's identifier
-        :return: Ffprobe's output as a deserialized JSON dictionary
-        :rtype: dict
+        :param int playlist_id: playlist's identifier
+        :return: a list of dictionaries with subtitles' details
+        :rtype: list
         """
         ffprobe_options = [
             '-show_streams',
             '-select_streams', 's',
             '-count_frames',
-            '-playlist', playlist_id]
+            '-playlist', str(playlist_id)]
+
         return self._analyze_bluray_disc(
-            disc_path, ffprobe_options, json_output=True)
+            disc_path, ffprobe_options, json_output=True)['streams']
 
     @staticmethod
     def _clean_formatted_output(ffprobe_output):
@@ -108,8 +128,8 @@ class FfprobeController(AbstractFfprobeController):
         :param list ffprobe_options: Ffprobe's options
         :param bool json_output: define format of Ffprobe's output
         :return: result of the analysis
-        :return type: an unformatted string if json_output is false;
-                      a dictionary otherwise.
+        :return type: an unformatted string if `json_output` is false;
+                      a dictionary otherwise
         """
         ffprobe_commandline = [
             'ffprobe',

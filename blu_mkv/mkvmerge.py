@@ -3,6 +3,8 @@ from pathlib import PurePath
 import re
 import subprocess
 
+from .bluray import PLAYLISTS_RELATIVE_PATH
+
 
 class AbstractMkvmergeController(metaclass=ABCMeta):
     @abstractmethod
@@ -27,7 +29,9 @@ class MkvmergeController(AbstractMkvmergeController):
         :rtype: dict
         """
         playlist_path = PurePath(
-            disc_path, 'BDMV/PLAYLIST/', '{:05d}.mpls'.format(playlist_id))
+            disc_path,
+            PLAYLISTS_RELATIVE_PATH,
+            '{:05d}.mpls'.format(playlist_id))
 
         mkvmerge_output = subprocess.check_output([
             'mkvmerge',

@@ -1,6 +1,9 @@
 from datetime import timedelta
 from pathlib import Path
 
+COVERS_RELATIVE_PATH = "BDMV/META/DL"
+PLAYLISTS_RELATIVE_PATH = "BDMV/PLAYLIST"
+
 
 class BlurayAnalyzer:
     """Analyze a Bluray disc by using Ffprobe and Mkvmerge command-line tools.
@@ -48,7 +51,7 @@ class BlurayAnalyzer:
 
         :return: list of found covers
         """
-        covers_path = Path(self.disc_path, 'BDMV/META/DL')
+        covers_path = Path(self.disc_path, COVERS_RELATIVE_PATH)
         return [{
             'path': str(found_cover),
             'size': found_cover.stat().st_size,

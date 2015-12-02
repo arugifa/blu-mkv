@@ -33,7 +33,7 @@ def ffprobe(request):
     scope='session',
     params=[(FfprobeController, MkvmergeController),
             (StubFfprobeController, StubMkvmergeController)])
-def bluray_analyzer(request, bluray_path):
+def bluray_analyzer(request):
     ffprobe_controller = request.param[0]()
     mkvmerge_controller = request.param[1]()
-    return BlurayAnalyzer(bluray_path, ffprobe_controller, mkvmerge_controller)
+    return BlurayAnalyzer(ffprobe_controller, mkvmerge_controller)

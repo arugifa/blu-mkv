@@ -16,5 +16,5 @@ def mkvmerge():
 
 
 @pytest.fixture(scope='session')
-def bluray_analyzer(bluray_dir, ffprobe, mkvmerge):
-    return BlurayAnalyzer(str(bluray_dir), ffprobe, mkvmerge)
+def bluray_analyzer(ffprobe, mkvmerge):
+    return BlurayAnalyzer(ffprobe, mkvmerge)

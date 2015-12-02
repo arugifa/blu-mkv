@@ -13,7 +13,7 @@ class AbstractMkvmergeController(metaclass=ABCMeta):
 
 
 class MkvmergeController(AbstractMkvmergeController):
-    def get_bluray_playlist_tracks(self, disc_path, playlist_id):
+    def get_bluray_playlist_tracks(self, disc_path, playlist_number):
         """Return tracks' details of a specific Bluray disc's playlist.
 
         Details are dictionaries with the following keys:
@@ -24,14 +24,14 @@ class MkvmergeController(AbstractMkvmergeController):
                       on the track's codec.
 
         :param str disc_path: Bluray disc's path
-        :param int playlist_id: playlist's identifier
-        :return: a dictionary of found tracks, with their identifier as keys
+        :param int playlist_number: playlist's number
+        :return: a dictionary of found tracks, with their identifier as key
         :rtype: dict
         """
         playlist_path = PurePath(
             disc_path,
             PLAYLISTS_RELATIVE_PATH,
-            '{:05d}.mpls'.format(playlist_id))
+            '{:05d}.mpls'.format(playlist_number))
 
         mkvmerge_output = subprocess.check_output([
             'mkvmerge',

@@ -4,7 +4,8 @@ from .mkvmerge import AbstractMkvmergeController
 
 class StubFfprobeController(AbstractFfprobeController):
     def get_default_bluray_playlist_number(self, disc_path):
-        return 419
+        all_playlists = self.get_bluray_playlists(disc_path)
+        return max(all_playlists, key=lambda i: all_playlists[i]['duration'])
 
     def get_bluray_playlists(self, disc_path):
         return {

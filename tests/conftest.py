@@ -19,4 +19,4 @@ def bluray_covers(bluray_dir):
     big_cover = covers_dir.join('big_cover.jpg')
     big_cover.write_binary(b"fake BIG cover")
 
-    return [big_cover, small_cover]
+    return {'big': big_cover, 'small': small_cover}

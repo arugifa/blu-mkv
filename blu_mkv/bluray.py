@@ -1,6 +1,9 @@
 from datetime import timedelta
 from pathlib import Path
 
+from cached_property import cached_property
+
+
 COVERS_RELATIVE_PATH = "BDMV/META/DL"
 PLAYLISTS_RELATIVE_PATH = "BDMV/PLAYLIST"
 
@@ -134,3 +137,148 @@ class BlurayAnalyzer:
             track_id = subtitle['index']
             frames_count = int(subtitle['nb_read_frames'])
             subtitles[track_id]['frames_count'] = frames_count
+
+
+class BlurayDisc:
+    """Bluray disc representation.
+
+    Disc's items are accessed in a lazy fashion as such operations can be
+    time-consuming (like probing playlists).
+
+    :param path str: path of the disc
+    :param bluray_analyzer: used to lazily probe the disc,
+                            instance of :class:`.BlurayAnalyzer`
+    """
+    def __init__(self, path, bluray_analyzer):
+        self.path = path
+        self.bluray_analyzer = bluray_analyzer
+
+    @cached_property
+    def playlists(self):
+        """Return the disc's playlists, sorted by number.
+
+        Each playlist is an instance of :class:`.BlurayPlaylist`.
+
+        :rtype: list
+        """
+        disc_playlists = self.bluray_analyzer.get_playlists(self.path)
+        return sorted((
+            BlurayPlaylist(self, playlist_number, playlist_info['duration'])
+            for (playlist_number, playlist_info) in disc_playlists.items()
+        ), key=lambda playlist: playlist.number)
+
+    @cached_property
+    def covers(self):
+        """Return the disc's covers.
+
+        See :meth:`.BlurayAnalyzer.get_covers` for more information about
+        available covers' details.
+
+        :rtype: list
+        """
+        return self.bluray_analyzer.get_covers(self.path)
+
+    def get_movie_playlists(self, duration_factor=0.4):
+        """Return the disc's movie playlists (e.g. director's cut, special
+        edition, extended version, etc.).
+
+        Movie playlists are usually longer than other playlists like bonuses.
+        They are thus identified by applying a factor on the duration of the
+        longest disc's playlist. All playlists which are longer than the result
+        of this multiplication are considered as movie playlists.
+
+        :param float duration_factor: used to identify movie playlists
+        :rtype: list
+        """
+        longest_playlist = max(
+            self.playlists, key=lambda playlist: playlist.duration)
+        duration_limit = duration_factor * longest_playlist.duration
+
+        return [playlist for playlist in self.playlists
+                if playlist.duration >= duration_limit]
+
+    def get_biggest_cover(self):
+        """Return the biggest cover of the disc.
+
+        The biggest cover is differentiated from other covers in terms of file
+        size and not cover's dimensions.
+
+        :return: the biggest cover if the disc have covers, `None` otherwise
+        :rtype: dict or None
+        """
+        sorted_covers = sorted(
+            self.covers, key=lambda cover: cover['size'], reverse=True)
+
+        try:
+            return sorted_covers[0]
+        except IndexError:
+            return None
+
+
+class BlurayPlaylist:
+    """Bluray playlist representation.
+
+    Playlist's items are accessed in a lazy fashion as such operations can be
+    time-consuming (like identifying forced subtitles).
+
+    For more information about the available tracks' details of the playlist,
+    see :meth:`.BlurayAnalyzer.get_playlist_tracks`.
+
+    :param disc: Bluray disc containing the playlist,
+                 instance of :class:`.BlurayDisc`
+    :param int number: playlist identifier on the Bluray disc
+    :param duration: playlist's duration,
+                     instance of :class:`~datetime.timedelta`
+    """
+    def __init__(self, disc, number, duration):
+        self.disc = disc
+        self.number = number
+        self.duration = duration
+
+    def __eq__(self, other):
+        """Allow to compare playlists in unit tests."""
+        return self.disc == other.disc \
+               and self.number == other.number \
+               and self.duration == other.duration
+
+    @cached_property
+    def _all_tracks(self):
+        """Return all the playlist's tracks."""
+        return self.disc.bluray_analyzer.get_playlist_tracks(
+            self.disc.path, self.number)
+
+    @property
+    def video_tracks(self):
+        """Return a dictionary of the playlist's video tracks."""
+        return self._all_tracks['video']
+
+    @property
+    def audio_tracks(self):
+        """Return a dictionary of the playlist's audio tracks."""
+        return self._all_tracks['audio']
+
+    @property
+    def subtitle_tracks(self):
+        """Return a dictionary of the playlist's subtitle tracks."""
+        return self._all_tracks['subtitle']
+
+    def get_forced_subtitles(self, frames_count_factor=0.3):
+        """Return forced subtitles of the playlist.
+
+        Forced subtitles have usually less frames than other subtitles.
+        They are thus identified by applying a factor on the frames count of
+        the "biggest" playlist's subtitle track. All subtitles which have less
+        frames than the result of this multiplication are considered as forced
+        subtitles.
+
+        :param float frames_count_factor: used to identify forced subtitles
+        :rtype: dict
+        """
+        biggest_subtitle = max(
+            self.subtitle_tracks.values(),
+            key=lambda subtitle: subtitle['frames_count'])
+        frames_limit = frames_count_factor * biggest_subtitle['frames_count']
+
+        return {subtitle_id: subtitle_info
+                for subtitle_id, subtitle_info in self.subtitle_tracks.items()
+                if subtitle_info['frames_count'] < frames_limit}

@@ -1,2 +1,4 @@
+-r requirements.txt
+
 pytest>=2.8.1
 pytest-mock>=0.8.1

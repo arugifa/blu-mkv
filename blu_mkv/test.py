@@ -8,37 +8,25 @@ class StubFfprobeController(AbstractFfprobeController):
 
     def get_bluray_playlists(self, disc_path):
         return {
-            28: {'duration': '0:07:42'},
-            29: {'duration': '0:05:31'},
-            419: {'duration': '2:23:11'}}
+            28: {'duration': '0:59:59'},
+            29: {'duration': '1:00:00'},
+            419: {'duration': '2:00:00'}}
 
     def get_all_bluray_playlist_streams(self, disc_path, playlid_id):
         return [
-            {'index': 0,
-             'codec_type': 'video'},
-            {'index': 1,
-             'codec_type': 'audio'},
-            {'index': 2,
-             'codec_type': 'audio'},
-            {'index': 3,
-             'codec_type': 'subtitle'},
-            {'index': 4,
-             'codec_type': 'subtitle'},
-            {'index': 5,
-             'codec_type': 'subtitle'}]
+            {'index': 0, 'codec_type': 'video'},
+            {'index': 1, 'codec_type': 'audio'},
+            {'index': 2, 'codec_type': 'audio'},
+            {'index': 3, 'codec_type': 'subtitle'},
+            {'index': 4, 'codec_type': 'subtitle'},
+            {'index': 5, 'codec_type': 'subtitle'}]
 
     def get_bluray_playlist_subtitles_with_frames_count(
             self, disc_path, playlist_id):
         return [
-            {'index': 3,
-             'codec_type': 'subtitle',
-             'nb_read_frames': '2810'},
-            {'index': 4,
-             'codec_type': 'subtitle',
-             'nb_read_frames': '18'},
-            {'index': 5,
-             'codec_type': 'subtitle',
-             'nb_read_frames': '2680'}]
+            {'index': 3, 'nb_read_frames': '999'},
+            {'index': 4, 'nb_read_frames': '1000'},
+            {'index': 5, 'nb_read_frames': '2000'}]
 
 
 class StubMkvmergeController(AbstractMkvmergeController):

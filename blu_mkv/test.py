@@ -31,48 +31,69 @@ class StubFfprobeController(AbstractFfprobeController):
 
 
 class StubMkvmergeController(AbstractMkvmergeController):
-    def get_bluray_playlist_tracks(self, disc_path, playlist_id):
+    def get_bluray_playlist_info(self, disc_path, playlist_id):
         return {
-            0: {
-                'type': 'video',
-                'codec': 'MPEG-4p10/AVC/h.264',
-                'properties': {
-                    'pixel_dimensions': '1920x1080',
-                    'ts_pid': '4113'}},
-            1: {
-                'type': 'audio',
-                'codec': 'DTS-HD Master Audio',
-                'properties': {
-                    'audio_channels': '6',
-                    'audio_sampling_frequency': '48000',
-                    'language': 'fre',
-                    'ts_pid': '4352'}},
-            2: {
-                'type': 'audio',
-                'codec': 'DTS-HD Master Audio',
-                'properties': {
-                    'audio_channels': '6',
-                    'audio_sampling_frequency': '48000',
-                    'language': 'chi',
-                    'ts_pid': '4353'}},
-            3: {
-                'type': 'subtitles',
-                'codec': 'HDMV PGS',
-                'properties': {
-                    'language': 'fre',
-                    'text_subtitles': '1',
-                    'ts_pid': '4608'}},
-            4: {
-                'type': 'subtitles',
-                'codec': 'HDMV PGS',
-                'properties': {
-                    'language': 'fre',
-                    'text_subtitles': '1',
-                    'ts_pid': '4609'}},
-            5: {
-                'type': 'subtitles',
-                'codec': 'HDMV PGS',
-                'properties': {
-                    'language': 'chi',
-                    'text_subtitles': '1',
-                    'ts_pid': '4610'}}}
+            "tracks": [
+                {
+                    "codec": "MPEG-4p10/AVC/h.264",
+                    "id": 0,
+                    "properties": {
+                        "pixel_dimensions": "1920x1080",
+                        "ts_pid": 4113,
+                    },
+                    "type": "video",
+                },
+                {
+                    "codec": "DTS-HD Master Audio",
+                    "id": 1,
+                    "properties": {
+                        "audio_channels": 6,
+                        "audio_sampling_frequency": 48000,
+                        "language": "fre",
+                        "ts_pid": 4352,
+                    },
+                    "type": "audio",
+                },
+                {
+                    "codec": "DTS-HD Master Audio",
+                    "id": 2,
+                    "properties": {
+                        "audio_channels": 6,
+                        "audio_sampling_frequency": 48000,
+                        "language": "chi",
+                        "ts_pid": 4353,
+                    },
+                    "type": "audio",
+                },
+                {
+                    "codec": "HDMV PGS",
+                    "id": 3,
+                    "properties": {
+                        "language": "fre",
+                        "text_subtitles": True,
+                        "ts_pid": 4608,
+                    },
+                    "type": "subtitles",
+                },
+                {
+                    "codec": "HDMV PGS",
+                    "id": 4,
+                    "properties": {
+                        "language": "fre",
+                        "text_subtitles": True,
+                        "ts_pid": 4609,
+                    },
+                    "type": "subtitles",
+                },
+                {
+                    "codec": "HDMV PGS",
+                    "id": 5,
+                    "properties": {
+                        "language": "chi",
+                        "text_subtitles": True,
+                        "ts_pid": 4610,
+                    },
+                    "type": "subtitles",
+                },
+            ],
+        }

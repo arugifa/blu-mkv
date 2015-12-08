@@ -116,11 +116,11 @@ class BlurayAnalyzer:
         """Set all tracks language by using Mkvmerge."""
         mkvmerge_analysis = \
             self.mkvmerge \
-            .get_bluray_playlist_tracks(disc_path, playlist_number)
+            .get_bluray_playlist_info(disc_path, playlist_number)
 
         tracks_language = {
-            int(track_id): track_info['properties'].get('language')
-            for track_id, track_info in mkvmerge_analysis.items()}
+            track['id']: track['properties'].get('language')
+            for track in mkvmerge_analysis['tracks']}
 
         for tracks in playlist_tracks.values():
             for track_id, track_info in tracks.items():

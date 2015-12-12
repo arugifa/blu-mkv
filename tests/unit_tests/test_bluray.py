@@ -29,14 +29,22 @@ class TestBlurayAnalyzer:
                 1: {'language_code': 'fre'},
                 2: {'language_code': 'chi'}},
             'subtitle': {
-                3: {'language_code': 'fre', 'frames_count': 999},
-                4: {'language_code': 'fre', 'frames_count': 1000},
-                5: {'language_code': 'chi', 'frames_count': 2000}}}
+                3: {'language_code': 'fre'},
+                4: {'language_code': 'fre'},
+                5: {'language_code': 'chi'}}}
 
         actual_tracks = bluray_analyzer \
                         .get_playlist_tracks(str(bluray_dir), 419)
 
         assert actual_tracks == expected_tracks
+
+    def test_get_subtitles_frames_count(self, bluray_analyzer, bluray_dir):
+        expected_frames_count = {3: 999, 4: 1000, 5: 2000}
+
+        actual_frames_count = bluray_analyzer \
+                              .get_subtitles_frames_count(str(bluray_dir), 419)
+
+        assert actual_frames_count == expected_frames_count
 
 
 class TestBlurayDisc:
@@ -92,9 +100,9 @@ class TestBlurayPlaylist:
 
     def test_subtitle_tracks(self, bluray_playlist):
         expected_subtitle_tracks = {
-            3: {'language_code': 'fre', 'frames_count': 999},
-            4: {'language_code': 'fre', 'frames_count': 1000},
-            5: {'language_code': 'chi', 'frames_count': 2000}}
+            3: {'language_code': 'fre'},
+            4: {'language_code': 'fre'},
+            5: {'language_code': 'chi'}}
 
         assert bluray_playlist.subtitle_tracks == expected_subtitle_tracks
 
@@ -102,7 +110,6 @@ class TestBlurayPlaylist:
         actual_forced_subtitles = \
             bluray_playlist.get_forced_subtitles(frames_count_factor=0.5)
 
-        expected_forced_subtitles = {
-            3: {'language_code': 'fre', 'frames_count': 999}}
+        expected_forced_subtitles = {3: {'language_code': 'fre'}}
 
         assert actual_forced_subtitles == expected_forced_subtitles

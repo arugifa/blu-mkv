@@ -72,10 +72,6 @@ class BlurayAnalyzer:
         - language_code: `str`, language of the track if defined;
                          `None` otherwise
 
-        Subtitle tracks have the following additional details:
-        - frames_count: `int`, number of frames; useful to identify forced
-                        subtitles.
-
         :param str disc_path: path of the Bluray disc
         :param int playlist_number: playlist's number
         :return: a dictionary of playlist's tracks. Each track is accessible
@@ -84,9 +80,6 @@ class BlurayAnalyzer:
         """
         playlist_tracks = self._get_all_tracks(disc_path, playlist_number)
         self._set_tracks_languages(disc_path, playlist_number, playlist_tracks)
-        self._set_subtitles_frames_count(
-            disc_path, playlist_number, playlist_tracks['subtitle'])
-
         return playlist_tracks
 
     def _get_all_tracks(self, disc_path, playlist_number):
@@ -126,17 +119,28 @@ class BlurayAnalyzer:
             for track_id, track_info in tracks.items():
                 track_info['language_code'] = tracks_language[track_id]
 
-    def _set_subtitles_frames_count(
-            self, disc_path, playlist_number, subtitles):
-        """Set subtitles' frames count by using Ffprobe."""
+    def get_subtitles_frames_count(self, disc_path, playlist_number):
+        """Get subtitles' frames count by using Ffprobe.
+
+        Useful to identify forced subtitles.
+
+        :param str disc_path: path of the Bluray disc
+        :param int playlist_number: playlist's number
+        :return: a dictionary with subtitle tracks' identifiers as keys,
+                 and frames counts as values
+        :return type: dict
+        """
         ffprobe_analysis = self.ffprobe \
                            .get_bluray_playlist_subtitles_with_frames_count(
                                disc_path, playlist_number)
 
+        subtitles = dict()
         for subtitle in ffprobe_analysis:
             track_id = subtitle['index']
             frames_count = int(subtitle['nb_read_frames'])
-            subtitles[track_id]['frames_count'] = frames_count
+            subtitles[track_id] = frames_count
+
+        return subtitles
 
 
 class BlurayDisc:
@@ -263,7 +267,8 @@ class BlurayPlaylist:
         return self._all_tracks['subtitle']
 
     def get_forced_subtitles(self, frames_count_factor=0.3):
-        """Return forced subtitles of the playlist.
+        """Return forced subtitles of the playlist, by computing frames count
+        for each subtitle track.
 
         Forced subtitles have usually less frames than other subtitles.
         They are thus identified by applying a factor on the frames count of
@@ -271,14 +276,18 @@ class BlurayPlaylist:
         frames than the result of this multiplication are considered as forced
         subtitles.
 
+        Be aware: this is a time-consuming operation!
+
         :param float frames_count_factor: used to identify forced subtitles
         :rtype: dict
         """
-        biggest_subtitle = max(
-            self.subtitle_tracks.values(),
-            key=lambda subtitle: subtitle['frames_count'])
-        frames_limit = frames_count_factor * biggest_subtitle['frames_count']
+        subtitles_frames_count = self.disc.bluray_analyzer \
+                                 .get_subtitles_frames_count(
+                                     self.disc.path, self.number)
+
+        biggest_subtitle = max(subtitles_frames_count.values())
+        frames_limit = frames_count_factor * biggest_subtitle
 
         return {subtitle_id: subtitle_info
                 for subtitle_id, subtitle_info in self.subtitle_tracks.items()
-                if subtitle_info['frames_count'] < frames_limit}
+                if subtitles_frames_count[subtitle_id] < frames_limit}

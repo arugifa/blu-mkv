@@ -1,5 +1,5 @@
 from datetime import timedelta
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from cached_property import cached_property
 
@@ -107,9 +107,12 @@ class BlurayAnalyzer:
     def _set_tracks_languages(
             self, disc_path, playlist_number, playlist_tracks):
         """Set all tracks language by using Mkvmerge."""
-        mkvmerge_analysis = \
-            self.mkvmerge \
-            .get_bluray_playlist_info(disc_path, playlist_number)
+        playlist_path = PurePath(
+            disc_path,
+            PLAYLISTS_RELATIVE_PATH,
+            '{:05d}.mpls'.format(playlist_number))
+
+        mkvmerge_analysis = self.mkvmerge.get_file_info(playlist_path)
 
         tracks_language = {
             track['id']: track['properties'].get('language')

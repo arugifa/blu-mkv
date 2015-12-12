@@ -31,7 +31,7 @@ class StubFfprobeController(AbstractFfprobeController):
 
 
 class StubMkvmergeController(AbstractMkvmergeController):
-    def get_bluray_playlist_info(self, disc_path, playlist_id):
+    def get_file_info(self, file_path):
         return {
             "tracks": [
                 {

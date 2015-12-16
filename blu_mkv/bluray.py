@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import timedelta
 from pathlib import Path, PurePath
 
@@ -44,8 +45,8 @@ class BlurayAnalyzer:
                 'duration': timedelta(
                     hours=playlist_duration[0],
                     minutes=playlist_duration[1],
-                    seconds=playlist_duration[2]),
-            }
+                    seconds=playlist_duration[2])}
+
         return playlists
 
     def get_covers(self, disc_path):
@@ -88,9 +89,9 @@ class BlurayAnalyzer:
         Among all tracks information provided by Ffprobe, only tracks'
         identifiers and types are kept, as other data is not used.
         """
-        ffprobe_analysis = \
-            self.ffprobe \
-            .get_all_bluray_playlist_streams(disc_path, playlist_number)
+        ffprobe_analysis = (
+            self.ffprobe
+            .get_all_bluray_playlist_streams(disc_path, playlist_number))
 
         tracks = {
             'audio': dict(),
@@ -133,9 +134,10 @@ class BlurayAnalyzer:
                  and frames counts as values
         :return type: dict
         """
-        ffprobe_analysis = self.ffprobe \
-                           .get_bluray_playlist_subtitles_with_frames_count(
-                               disc_path, playlist_number)
+        ffprobe_analysis = (
+            self.ffprobe
+            .get_bluray_playlist_subtitles_with_frames_count(
+                disc_path, playlist_number))
 
         subtitles = dict()
         for subtitle in ffprobe_analysis:
@@ -241,32 +243,55 @@ class BlurayPlaylist:
         self.disc = disc
         self.number = number
         self.duration = duration
+        self.path = str(PurePath(
+            disc.path, PLAYLISTS_RELATIVE_PATH, "{:05d}.mpls".format(number)))
 
     def __eq__(self, other):
         """Allow to compare playlists in unit tests."""
-        return self.disc == other.disc \
-               and self.number == other.number \
-               and self.duration == other.duration
+        return (self.disc == other.disc and
+                self.number == other.number and
+                self.duration == other.duration)
+
+    @staticmethod
+    def _sort_tracks(tracks):
+        """Sort tracks by ID."""
+        return OrderedDict(sorted(tracks.items(), key=lambda track: track[0]))
 
     @cached_property
     def _all_tracks(self):
         """Return all the playlist's tracks."""
-        return self.disc.bluray_analyzer.get_playlist_tracks(
-            self.disc.path, self.number)
+        all_tracks = (
+            self.disc.bluray_analyzer
+            .get_playlist_tracks(self.disc.path, self.number)
+            .copy())
+
+        for (track_type, tracks) in all_tracks.items():
+            all_tracks[track_type] = self._sort_tracks(tracks)
+
+        return all_tracks
 
     @property
     def video_tracks(self):
-        """Return a dictionary of the playlist's video tracks."""
+        """Return an ordered dictionary of the playlist's video tracks.
+
+        rtype: instance of :class:`~collections.OrderedDict`
+        """
         return self._all_tracks['video']
 
     @property
     def audio_tracks(self):
-        """Return a dictionary of the playlist's audio tracks."""
+        """Return an ordered dictionary of the playlist's audio tracks.
+
+        rtype: instance of :class:`~collections.OrderedDict`
+        """
         return self._all_tracks['audio']
 
     @property
     def subtitle_tracks(self):
-        """Return a dictionary of the playlist's subtitle tracks."""
+        """Return an ordered dictionary of the playlist's subtitle tracks.
+
+        rtype: instance of :class:`~collections.OrderedDict`
+        """
         return self._all_tracks['subtitle']
 
     def get_forced_subtitles(self, frames_count_factor=0.3):
@@ -282,15 +307,18 @@ class BlurayPlaylist:
         Be aware: this is a time-consuming operation!
 
         :param float frames_count_factor: used to identify forced subtitles
-        :rtype: dict
+        rtype: instance of :class:`~collections.OrderedDict`
         """
-        subtitles_frames_count = self.disc.bluray_analyzer \
-                                 .get_subtitles_frames_count(
-                                     self.disc.path, self.number)
+        subtitles_frames_count = (
+            self.disc.bluray_analyzer
+            .get_subtitles_frames_count(self.disc.path, self.number))
 
         biggest_subtitle = max(subtitles_frames_count.values())
         frames_limit = frames_count_factor * biggest_subtitle
 
-        return {subtitle_id: subtitle_info
-                for subtitle_id, subtitle_info in self.subtitle_tracks.items()
-                if subtitles_frames_count[subtitle_id] < frames_limit}
+        forced_subtitles = {
+            subtitle_id: subtitle_info
+            for subtitle_id, subtitle_info in self.subtitle_tracks.items()
+            if subtitles_frames_count[subtitle_id] < frames_limit}
+
+        return self._sort_tracks(forced_subtitles)

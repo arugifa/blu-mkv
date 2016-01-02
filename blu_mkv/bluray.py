@@ -113,7 +113,7 @@ class BlurayAnalyzer:
             PLAYLISTS_RELATIVE_PATH,
             '{:05d}.mpls'.format(playlist_number))
 
-        mkvmerge_analysis = self.mkvmerge.get_file_info(playlist_path)
+        mkvmerge_analysis = self.mkvmerge.get_file_info(str(playlist_path))
 
         tracks_language = {
             track['id']: track['properties'].get('language')

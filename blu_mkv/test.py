@@ -20,6 +20,10 @@ class StubFfprobeController(AbstractFfprobeController):
             419: {
                 'bit_rate': '31605890',
                 'duration': '7200.000000',
+                'size': '33940936704'},
+            420: {
+                'bit_rate': '31605890',
+                'duration': '7200.000000',
                 'size': '33940936704'}}
 
     def get_all_bluray_playlist_streams(self, disc_path, playlid_id):

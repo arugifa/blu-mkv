@@ -8,9 +8,12 @@ class TestBlurayAnalyzer:
     def test_get_playlists(self, bluray_analyzer, bluray_dir):
         actual_playlists = bluray_analyzer.get_playlists(str(bluray_dir))
         expected_playlists = {
-            28: {'duration': timedelta(minutes=59, seconds=59)},
-            29: {'duration': timedelta(hours=1)},
-            419: {'duration': timedelta(hours=2)}}
+            28: {'duration': timedelta(minutes=59, seconds=59),
+                 'size': 16970468350},
+            29: {'duration': timedelta(hours=1),
+                 'size': 16970468352},
+            419: {'duration': timedelta(hours=2),
+                  'size': 33940936704}}
 
         assert actual_playlists == expected_playlists
 

@@ -9,9 +9,9 @@ class StubFfprobeController(AbstractFfprobeController):
 
     def get_bluray_playlists(self, disc_path):
         return {
-            28: {'duration': '0:59:59'},
-            29: {'duration': '1:00:00'},
-            419: {'duration': '2:00:00'}}
+            28: {'duration': '3599.000000', 'size': '16970468350'},
+            29: {'duration': '3600.000000', 'size': '16970468352'},
+            419: {'duration': '7200.000000', 'size': '33940936704'}}
 
     def get_all_bluray_playlist_streams(self, disc_path, playlid_id):
         return [

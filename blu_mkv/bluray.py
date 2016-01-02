@@ -28,7 +28,8 @@ class BlurayAnalyzer:
         Ffprobe.
 
         Details are dictionaries with the following keys:
-        - duration: playlist duration, instance of :class:`datetime.timedelta`.
+        - duration: playlist duration, instance of :class:`datetime.timedelta`,
+        - size: ``int``, playlist size in octets.
 
         :param str disc_path: path of the Bluray disc
         :return: a dictionary of found playlists, with their number as key
@@ -38,14 +39,11 @@ class BlurayAnalyzer:
 
         playlists = dict()
         for playlist_number, playlist_info in ffprobe_analysis.items():
-            playlist_duration = [
-                int(i) for i in playlist_info['duration'].split(':')]
+            playlist_duration = float(playlist_info['duration'])
 
             playlists[playlist_number] = {
-                'duration': timedelta(
-                    hours=playlist_duration[0],
-                    minutes=playlist_duration[1],
-                    seconds=playlist_duration[2])}
+                'duration': timedelta(seconds=playlist_duration),
+                'size': int(playlist_info['size'])}
 
         return playlists
 

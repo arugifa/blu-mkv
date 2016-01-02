@@ -86,7 +86,7 @@ class BlurayAnalyzer:
         """Get all tracks of a playlist by using Ffprobe.
 
         Among all tracks information provided by Ffprobe, only tracks'
-        identifiers and types are kept, as other data is not used.
+        indices, codec types and ids are kept, as other data is not used.
         """
         ffprobe_analysis = (
             self.ffprobe
@@ -100,7 +100,7 @@ class BlurayAnalyzer:
         for track in ffprobe_analysis:
             track_id = track['index']
             track_type = track['codec_type']
-            tracks[track_type][track_id] = dict()
+            tracks[track_type][track_id] = {'uid': int(track['id'], base=16)}
 
         return tracks
 
@@ -297,9 +297,25 @@ class BlurayPlaylist:
     def audio_tracks(self):
         """Return an ordered dictionary of the playlist's audio tracks.
 
+        High Definition tracks can embed a second track (aka core stream) in
+        Simple Definition/lossy format. When this is the case, the SD track is
+        discarded.
+
         rtype: instance of :class:`~collections.OrderedDict`
         """
-        return self._all_tracks['audio']
+        filtered_tracks = OrderedDict()
+        for (track_id, track_info) in self._all_tracks['audio'].items():
+            # Discard SD/lossy tracks, which have the same UID as their
+            # relative HD tracks, but a bigger index (track number).
+            track_is_lossy = any(
+                track_info['uid'] == other_track['uid']
+                for other_track in filtered_tracks.values())
+
+            if track_is_lossy:
+                continue
+            filtered_tracks[track_id] = track_info
+
+        return filtered_tracks
 
     @property
     def subtitle_tracks(self):

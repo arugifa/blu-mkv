@@ -24,19 +24,20 @@ class StubFfprobeController(AbstractFfprobeController):
 
     def get_all_bluray_playlist_streams(self, disc_path, playlid_id):
         return [
-            {'index': 0, 'codec_type': 'video'},
-            {'index': 1, 'codec_type': 'audio'},
-            {'index': 2, 'codec_type': 'audio'},
-            {'index': 3, 'codec_type': 'subtitle'},
-            {'index': 4, 'codec_type': 'subtitle'},
-            {'index': 5, 'codec_type': 'subtitle'}]
+            {'index': 0, 'codec_type': 'video', 'id': '0x1011'},
+            {'index': 1, 'codec_type': 'audio', 'id': '0x1100'},
+            {'index': 2, 'codec_type': 'audio', 'id': '0x1100'},
+            {'index': 3, 'codec_type': 'audio', 'id': '0x1101'},
+            {'index': 4, 'codec_type': 'subtitle', 'id': '0x1200'},
+            {'index': 5, 'codec_type': 'subtitle', 'id': '0x1201'},
+            {'index': 6, 'codec_type': 'subtitle', 'id': '0x1202'}]
 
     def get_bluray_playlist_subtitles_with_frames_count(
             self, disc_path, playlist_id):
         return [
-            {'index': 3, 'nb_read_frames': '999'},
-            {'index': 4, 'nb_read_frames': '1000'},
-            {'index': 5, 'nb_read_frames': '2000'}]
+            {'index': 4, 'nb_read_frames': '999'},
+            {'index': 5, 'nb_read_frames': '1000'},
+            {'index': 6, 'nb_read_frames': '2000'}]
 
 
 class StubMkvmergeController(AbstractMkvmergeController):
@@ -64,8 +65,19 @@ class StubMkvmergeController(AbstractMkvmergeController):
                     "type": "audio",
                 },
                 {
-                    "codec": "DTS-HD Master Audio",
+                    "codec": "DTS",
                     "id": 2,
+                    "properties": {
+                        "audio_channels": 6,
+                        "audio_sampling_frequency": 48000,
+                        "language": "fre",
+                        "ts_pid": 4352,
+                    },
+                    "type": "audio",
+                },
+                {
+                    "codec": "DTS-HD Master Audio",
+                    "id": 3,
                     "properties": {
                         "audio_channels": 6,
                         "audio_sampling_frequency": 48000,
@@ -76,7 +88,7 @@ class StubMkvmergeController(AbstractMkvmergeController):
                 },
                 {
                     "codec": "HDMV PGS",
-                    "id": 3,
+                    "id": 4,
                     "properties": {
                         "language": "fre",
                         "text_subtitles": True,
@@ -86,7 +98,7 @@ class StubMkvmergeController(AbstractMkvmergeController):
                 },
                 {
                     "codec": "HDMV PGS",
-                    "id": 4,
+                    "id": 5,
                     "properties": {
                         "language": "fre",
                         "text_subtitles": True,
@@ -96,7 +108,7 @@ class StubMkvmergeController(AbstractMkvmergeController):
                 },
                 {
                     "codec": "HDMV PGS",
-                    "id": 5,
+                    "id": 6,
                     "properties": {
                         "language": "chi",
                         "text_subtitles": True,

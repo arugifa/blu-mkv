@@ -38,14 +38,15 @@ class TestBlurayAnalyzer:
 
         expected_tracks = {
             'video': {
-                0: {'language_code': None}},
+                0: {'language_code': None, 'uid': 4113}},
             'audio': {
-                1: {'language_code': 'fre'},
-                2: {'language_code': 'chi'}},
+                1: {'language_code': 'fre', 'uid': 4352},
+                2: {'language_code': 'fre', 'uid': 4352},
+                3: {'language_code': 'chi', 'uid': 4353}},
             'subtitle': {
-                3: {'language_code': 'fre'},
-                4: {'language_code': 'fre'},
-                5: {'language_code': 'chi'}}}
+                4: {'language_code': 'fre', 'uid': 4608},
+                5: {'language_code': 'fre', 'uid': 4609},
+                6: {'language_code': 'chi', 'uid': 4610}}}
 
         assert actual_tracks == expected_tracks
 
@@ -53,7 +54,7 @@ class TestBlurayAnalyzer:
         actual_frames_count =\
             bluray_analyzer.get_subtitles_frames_count(str(bluray_dir), 419)
 
-        expected_frames_count = {3: 999, 4: 1000, 5: 2000}
+        expected_frames_count = {4: 999, 5: 1000, 6: 2000}
 
         assert actual_frames_count == expected_frames_count
 
@@ -162,7 +163,8 @@ class TestBlurayPlaylist:
 
     def test_video_tracks(self, bluray_playlist):
         actual_video_tracks = bluray_playlist.video_tracks
-        expected_video_tracks = OrderedDict([(0, {'language_code': None})])
+        expected_video_tracks = OrderedDict([
+            (0, {'language_code': None, 'uid': 4113})])
 
         assert isinstance(actual_video_tracks, OrderedDict)
         assert actual_video_tracks == expected_video_tracks
@@ -170,8 +172,8 @@ class TestBlurayPlaylist:
     def test_audio_tracks(self, bluray_playlist):
         actual_audio_tracks = bluray_playlist.audio_tracks
         expected_audio_tracks = OrderedDict([
-            (1, {'language_code': 'fre'}),
-            (2, {'language_code': 'chi'})])
+            (1, {'language_code': 'fre', 'uid': 4352}),
+            (3, {'language_code': 'chi', 'uid': 4353})])
 
         assert isinstance(actual_audio_tracks, OrderedDict)
         assert actual_audio_tracks == expected_audio_tracks
@@ -179,9 +181,9 @@ class TestBlurayPlaylist:
     def test_subtitle_tracks(self, bluray_playlist):
         actual_subtitle_tracks = bluray_playlist.subtitle_tracks
         expected_subtitle_tracks = OrderedDict([
-            (3, {'language_code': 'fre'}),
-            (4, {'language_code': 'fre'}),
-            (5, {'language_code': 'chi'})])
+            (4, {'language_code': 'fre', 'uid': 4608}),
+            (5, {'language_code': 'fre', 'uid': 4609}),
+            (6, {'language_code': 'chi', 'uid': 4610})])
 
         assert isinstance(actual_subtitle_tracks, OrderedDict)
         assert actual_subtitle_tracks == expected_subtitle_tracks
@@ -191,7 +193,7 @@ class TestBlurayPlaylist:
             bluray_playlist.get_forced_subtitles(frames_count_factor=0.5)
 
         expected_forced_subtitles =\
-            OrderedDict([(3, {'language_code': 'fre'})])
+            OrderedDict([(4, {'language_code': 'fre', 'uid': 4608})])
 
         assert isinstance(actual_forced_subtitles, OrderedDict)
         assert actual_forced_subtitles == expected_forced_subtitles

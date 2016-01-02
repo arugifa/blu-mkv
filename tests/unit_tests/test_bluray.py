@@ -8,12 +8,18 @@ class TestBlurayAnalyzer:
     def test_get_playlists(self, bluray_analyzer, bluray_dir):
         actual_playlists = bluray_analyzer.get_playlists(str(bluray_dir))
         expected_playlists = {
-            28: {'duration': timedelta(minutes=59, seconds=59),
-                 'size': 16970468350},
-            29: {'duration': timedelta(hours=1),
-                 'size': 16970468352},
-            419: {'duration': timedelta(hours=2),
-                  'size': 33940936704}}
+            28: {
+                'bit_rate': 15802940,
+                'duration': timedelta(minutes=59, seconds=59),
+                'size': 16970468350},
+            29: {
+                'bit_rate': 15802945,
+                'duration': timedelta(hours=1),
+                'size': 16970468352},
+            419: {
+                'bit_rate': 31605890,
+                'duration': timedelta(hours=2),
+                'size': 33940936704}}
 
         assert actual_playlists == expected_playlists
 
@@ -54,9 +60,24 @@ class TestBlurayAnalyzer:
 class TestBlurayDisc:
     def test_bluray_playlists(self, bluray_disc):
         expected_playlists = [
-            BlurayPlaylist(bluray_disc, 28, timedelta(minutes=59, seconds=59)),
-            BlurayPlaylist(bluray_disc, 29, timedelta(hours=1)),
-            BlurayPlaylist(bluray_disc, 419, timedelta(hours=2))]
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=28,
+                duration=timedelta(minutes=59, seconds=59),
+                size=16970468350,
+                bit_rate=15802940),
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=29,
+                duration=timedelta(hours=1),
+                size=16970468352,
+                bit_rate=15802945),
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=419,
+                duration=timedelta(hours=2),
+                size=33940936704,
+                bit_rate=31605890)]
 
         assert bluray_disc.playlists == expected_playlists
 
@@ -65,8 +86,18 @@ class TestBlurayDisc:
             bluray_disc.get_movie_playlists(duration_factor=0.5)
 
         expected_movie_playlists = [
-            BlurayPlaylist(bluray_disc, 29, timedelta(hours=1)),
-            BlurayPlaylist(bluray_disc, 419, timedelta(hours=2))]
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=29,
+                duration=timedelta(hours=1),
+                size=16970468352,
+                bit_rate=15802945),
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=419,
+                duration=timedelta(hours=2),
+                size=33940936704,
+                bit_rate=31605890)]
 
         assert actual_movie_playlists == expected_movie_playlists
 
@@ -91,6 +122,17 @@ class TestBlurayDisc:
 
 
 class TestBlurayPlaylist:
+    def test_playlists_equality(self, bluray_disc):
+        playlists = [
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=0,
+                duration=timedelta(hours=2),
+                size=20000000000,
+                bit_rate=30000000,
+            ) for _ in range(2)]
+        assert playlists[0] == playlists[1]
+
     def test_video_tracks(self, bluray_playlist):
         actual_video_tracks = bluray_playlist.video_tracks
         expected_video_tracks = OrderedDict([(0, {'language_code': None})])

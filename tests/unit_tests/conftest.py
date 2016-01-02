@@ -28,4 +28,9 @@ def bluray_disc(bluray_analyzer, bluray_dir):
 
 @pytest.fixture(scope='session')
 def bluray_playlist(bluray_disc):
-    return BlurayPlaylist(bluray_disc, 419, timedelta(hours=2))
+    return BlurayPlaylist(
+        disc=bluray_disc,
+        number=419,
+        duration=timedelta(hours=2),
+        size=33940936704,
+        bit_rate=31605890)

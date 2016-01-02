@@ -42,6 +42,7 @@ class BlurayAnalyzer:
             playlist_duration = float(playlist_info['duration'])
 
             playlists[playlist_number] = {
+                'bit_rate': int(playlist_info['bit_rate']),
                 'duration': timedelta(seconds=playlist_duration),
                 'size': int(playlist_info['size'])}
 
@@ -168,11 +169,19 @@ class BlurayDisc:
 
         :rtype: list
         """
-        disc_playlists = self.bluray_analyzer.get_playlists(self.path)
-        return sorted((
-            BlurayPlaylist(self, playlist_number, playlist_info['duration'])
-            for (playlist_number, playlist_info) in disc_playlists.items()
-        ), key=lambda playlist: playlist.number)
+        raw_playlists = self.bluray_analyzer.get_playlists(self.path)
+
+        playlists = list()
+        for (playlist_number, playlist_info) in raw_playlists.items():
+            playlist = BlurayPlaylist(
+                disc=self,
+                number=playlist_number,
+                duration=playlist_info['duration'],
+                size=playlist_info['size'],
+                bit_rate=playlist_info['bit_rate'])
+            playlists.append(playlist)
+
+        return sorted(playlists, key=lambda playlist: playlist.number)
 
     @cached_property
     def covers(self):
@@ -237,18 +246,21 @@ class BlurayPlaylist:
     :param duration: playlist's duration,
                      instance of :class:`~datetime.timedelta`
     """
-    def __init__(self, disc, number, duration):
+    def __init__(self, disc, number, duration, size, bit_rate):
         self.disc = disc
         self.number = number
         self.duration = duration
+        self.size = size
+        self.bit_rate = bit_rate
         self.path = str(PurePath(
             disc.path, PLAYLISTS_RELATIVE_PATH, "{:05d}.mpls".format(number)))
 
     def __eq__(self, other):
-        """Allow to compare playlists in unit tests."""
         return (self.disc == other.disc and
                 self.number == other.number and
-                self.duration == other.duration)
+                self.duration == other.duration and
+                self.size == other.size and
+                self.bit_rate == other.bit_rate)
 
     @staticmethod
     def _sort_tracks(tracks):

@@ -11,7 +11,7 @@ def test_mount_disk_image(mock):
     utils.mount_disk_image(image_path, mount_point)
 
     subprocess.check_call.assert_called_once_with(
-        ['sudo', 'mount', '-o loop', image_path, mount_point])
+        ['sudo', 'mount', '-o', 'loop', image_path, mount_point])
 
 
 def test_umount_disk_image(mock):

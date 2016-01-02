@@ -10,7 +10,7 @@ def mount_disk_image(image_path, mount_point):
     subprocess.check_call([
         'sudo',
         'mount',
-        '-o loop',
+        '-o', 'loop',
         image_path,
         mount_point])
 

@@ -29,7 +29,7 @@ class BlurayAnalyzer:
 
         Details are dictionaries with the following keys:
         - duration: playlist duration, instance of :class:`datetime.timedelta`,
-        - size: ``int``, playlist size in octets.
+        - size: ``int``, playlist size in bytes.
 
         :param str disc_path: path of the Bluray disc
         :return: a dictionary of found playlists, with their number as key
@@ -248,6 +248,9 @@ class BlurayPlaylist:
     :param int number: playlist identifier on the Bluray disc
     :param duration: playlist's duration,
                      instance of :class:`~datetime.timedelta`
+    :param int size: playlist's size in bytes
+    :param int bit_rate: playlist's bit rate in bytes per second
+    :param str path: playlist's path
     """
     def __init__(self, disc, number, duration, size, bit_rate):
         self.disc = disc

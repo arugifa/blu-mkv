@@ -166,20 +166,23 @@ class BlurayDisc:
         """Return the disc's playlists, sorted by number.
 
         Each playlist is an instance of :class:`.BlurayPlaylist`.
+        Duplicate playlists are filtered in order to keep only one of them.
 
         :rtype: list
         """
         raw_playlists = self.bluray_analyzer.get_playlists(self.path)
 
         playlists = list()
-        for (playlist_number, playlist_info) in raw_playlists.items():
+        for (playlist_number, playlist_info) in sorted(raw_playlists.items()):
             playlist = BlurayPlaylist(
                 disc=self,
                 number=playlist_number,
                 duration=playlist_info['duration'],
                 size=playlist_info['size'],
                 bit_rate=playlist_info['bit_rate'])
-            playlists.append(playlist)
+
+            if playlist not in playlists:
+                playlists.append(playlist)
 
         return sorted(playlists, key=lambda playlist: playlist.number)
 
@@ -257,7 +260,6 @@ class BlurayPlaylist:
 
     def __eq__(self, other):
         return (self.disc == other.disc and
-                self.number == other.number and
                 self.duration == other.duration and
                 self.size == other.size and
                 self.bit_rate == other.bit_rate)

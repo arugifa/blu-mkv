@@ -1,7 +1,8 @@
 from collections import OrderedDict
 from datetime import timedelta
 
-from blu_mkv.bluray import BlurayDisc, BlurayPlaylist
+from blu_mkv.bluray import BlurayAnalyzer, BlurayDisc, BlurayPlaylist
+from blu_mkv.test import StubFfprobeController
 
 
 class TestBlurayAnalyzer:
@@ -81,6 +82,32 @@ class TestBlurayDisc:
 
         assert bluray_disc.playlists == expected_playlists
 
+    def test_bluray_disc_has_not_dupplicate_playlists(
+            self, bluray_dir, mkvmerge):
+
+        class TestFfprobeController(StubFfprobeController):
+            def get_bluray_playlists(self, disc_path):
+                return {
+                    playlist_number: {
+                        'bit_rate': '31605890',
+                        'duration': '7200.000000',
+                        'size': '33940936704',
+                    } for playlist_number in range(2)}
+
+        ffprobe = TestFfprobeController()
+        bluray_analyzer = BlurayAnalyzer(ffprobe, mkvmerge)
+        bluray_disc = BlurayDisc(str(bluray_dir), bluray_analyzer)
+
+        expected_playlists = [
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=0,
+                duration=timedelta(hours=2),
+                size=33940936704,
+                bit_rate=31605890)]
+
+        assert bluray_disc.playlists == expected_playlists
+
     def test_get_movie_playlists(self, bluray_disc):
         actual_movie_playlists =\
             bluray_disc.get_movie_playlists(duration_factor=0.5)
@@ -126,11 +153,11 @@ class TestBlurayPlaylist:
         playlists = [
             BlurayPlaylist(
                 disc=bluray_disc,
-                number=0,
+                number=playlist_number,
                 duration=timedelta(hours=2),
                 size=20000000000,
                 bit_rate=30000000,
-            ) for _ in range(2)]
+            ) for playlist_number in range(2)]
         assert playlists[0] == playlists[1]
 
     def test_video_tracks(self, bluray_playlist):

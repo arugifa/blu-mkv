@@ -19,3 +19,15 @@ class TestBlurayAnalyzer:
 
         for track_type in ['video', 'audio', 'subtitle']:
             assert len(tracks[track_type]) > 0
+
+    @pytest.mark.ffprobe
+    def test_get_subtitles_frames_count(self, bluray_analyzer, bluray_path):
+        default_playlist = (
+            bluray_analyzer.ffprobe
+            .get_default_bluray_playlist_number(bluray_path))
+
+        frames_count = (
+            bluray_analyzer
+            .get_subtitles_frames_count(str(bluray_path), default_playlist))
+
+        assert len(frames_count) > 0

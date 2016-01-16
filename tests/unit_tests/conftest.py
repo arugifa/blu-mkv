@@ -2,23 +2,28 @@ from datetime import timedelta
 
 import pytest
 
+from blu_mkv import test
 from blu_mkv.bluray import BlurayAnalyzer, BlurayDisc, BlurayPlaylist
-from blu_mkv.test import StubFfprobeController, StubMkvmergeController
 
 
 @pytest.fixture(scope='session')
 def ffprobe():
-    return StubFfprobeController()
+    return test.StubFfprobeController()
+
+
+@pytest.fixture(scope='session')
+def makemkv():
+    return test.StubMakemkvController()
 
 
 @pytest.fixture(scope='session')
 def mkvmerge():
-    return StubMkvmergeController()
+    return test.StubMkvmergeController()
 
 
 @pytest.fixture(scope='session')
-def bluray_analyzer(ffprobe, mkvmerge):
-    return BlurayAnalyzer(ffprobe, mkvmerge)
+def bluray_analyzer(ffprobe, makemkv, mkvmerge):
+    return BlurayAnalyzer(ffprobe, mkvmerge, makemkv)
 
 
 @pytest.fixture(scope='session')

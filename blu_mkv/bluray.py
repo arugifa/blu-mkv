@@ -18,10 +18,16 @@ class BlurayAnalyzer:
     :param mkvmerge_controller:
         interface with Ffprobe, instance of subclass of
         :class:`~blu_mkv.mkvmerge.AbstractMkvmergeController`
+    :param makemkv_controller:
+        interface with Makemkv, instance of subclass of
+        :class:`~blu_mkv.makemkv.AbstractMakemkvController`
     """
-    def __init__(self, ffprobe_controller, mkvmerge_controller):
+    def __init__(
+            self, ffprobe_controller, mkvmerge_controller,
+            makemkv_controller=None):
         self.ffprobe = ffprobe_controller
         self.mkvmerge = mkvmerge_controller
+        self.makemkv = makemkv_controller
 
     def get_playlists(self, disc_path):
         """Return details of playlists present on a Bluray disc by using
@@ -31,7 +37,8 @@ class BlurayAnalyzer:
         - duration: playlist duration, instance of :class:`datetime.timedelta`,
         - size: ``int``, playlist size in bytes.
 
-        :param str disc_path: path of the Bluray disc
+        :param str disc_path: path of the Bluray disc. Must points to a
+                              directory
         :return: a dictionary of found playlists, with their number as key
         :return type: dict
         """
@@ -55,7 +62,8 @@ class BlurayAnalyzer:
         - path: `str`, cover's absolute path,
         - size: `int`, cover's size in bytes.
 
-        :param str disc_path: path of the Bluray disc
+        :param str disc_path: path of the Bluray disc. Must points to a
+                              directory
         :return: list of found covers
         """
         covers_path = Path(disc_path, COVERS_RELATIVE_PATH)
@@ -69,13 +77,16 @@ class BlurayAnalyzer:
         by using Ffprobe and Mkvmerge.
 
         All tracks have the following details:
-        - language_code: `str`, language of the track if defined;
-                         `None` otherwise
+        - language_code: `str`, language of the track if defined
+                         (in ISO639-2 format); `None` otherwise
+        - uid: `int`, unique identifier of the track
 
-        :param str disc_path: path of the Bluray disc
+        :param str disc_path: path of the Bluray disc. Must points to a
+                              directory
         :param int playlist_number: playlist's number
         :return: a dictionary of playlist's tracks. Each track is accessible
-                 through its type (video, audio or subtitle) and identifier.
+                 through its type (video, audio or subtitle) and index (which
+                 is different from the track's uid)
         :return type: dict
         """
         playlist_tracks = self._get_all_tracks(disc_path, playlist_number)
@@ -127,7 +138,8 @@ class BlurayAnalyzer:
 
         Useful to identify forced subtitles.
 
-        :param str disc_path: path of the Bluray disc
+        :param str disc_path: path of the Bluray disc. Must points to a
+                              directory
         :param int playlist_number: playlist's number
         :return: a dictionary with subtitle tracks' identifiers as keys,
                  and frames counts as values
@@ -145,6 +157,36 @@ class BlurayAnalyzer:
             subtitles[track_id] = frames_count
 
         return subtitles
+
+    def identify_multiview_playlists(self, disc_path):
+        """Return numbers of playlists containing multiview tracks (like
+        three-dimensional video tracks) by using Makemkv.
+
+        :param str disc_path: path of the Bluray disc. Must points to a
+                              directory
+        :return: a list with numbers of multiview playlists
+        :return type: list
+        :raises AssertionError: if :attr:`.makemkv` is not set (no Makemkv
+                                controller defined)
+        """
+        assert self.makemkv is not None, (
+            "Cannot identify multiview playlists because the attribute"
+            "'makemkv' is not set")
+
+        makemkv_analysis = self.makemkv.get_disc_info('file', disc_path)
+
+        multiview_playlists = list()
+        for playlist in makemkv_analysis['titles'].values():
+            playlist_has_multiview = any(
+                'MVC' in stream['codec_short']
+                for stream in playlist['streams'].values())
+
+            if playlist_has_multiview:
+                playlist_file = PurePath(playlist['source_file_name'])
+                playlist_id = int(playlist_file.stem)
+                multiview_playlists.append(playlist_id)
+
+        return multiview_playlists
 
 
 class BlurayDisc:
@@ -185,6 +227,18 @@ class BlurayDisc:
                 playlists.append(playlist)
 
         return sorted(playlists, key=lambda playlist: playlist.number)
+
+    @cached_property
+    def multiview_playlists(self):
+        """Return playlists containing multiview tracks (like
+        three-dimensional video tracks), sorted by number.
+
+        :rtype: list
+        """
+        multiview_playlists_numbers =\
+            self.bluray_analyzer.identify_multiview_playlists(self.path)
+        return [playlist for playlist in self.playlists
+                if playlist.number in multiview_playlists_numbers]
 
     @cached_property
     def covers(self):
@@ -353,3 +407,11 @@ class BlurayPlaylist:
             if subtitles_frames_count[subtitle_id] < frames_limit}
 
         return self._sort_tracks(forced_subtitles)
+
+    def has_multiview(self):
+        """Detect if the playlist has multiview tracks (like three-dimensional
+        video tracks).
+
+        :rtype: bool
+        """
+        return (self in self.disc.multiview_playlists)

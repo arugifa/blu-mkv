@@ -1,7 +1,9 @@
 from collections import OrderedDict
 from datetime import timedelta
 
-from blu_mkv.bluray import BlurayDisc, BlurayPlaylist
+import pytest
+
+from blu_mkv.bluray import BlurayAnalyzer, BlurayDisc, BlurayPlaylist
 
 
 class TestBlurayAnalyzer:
@@ -61,6 +63,20 @@ class TestBlurayAnalyzer:
 
         assert actual_frames_count == expected_frames_count
 
+    def test_identify_multiview_playlists(self, bluray_analyzer, bluray_dir):
+        actual_multiview_playlists =\
+            bluray_analyzer.identify_multiview_playlists(str(bluray_dir))
+
+        expected_multiview_playlists = [419]
+
+        assert actual_multiview_playlists == expected_multiview_playlists
+
+    def test_multiview_playlists_identification_needs_makemkv(
+            self, ffprobe, mkvmerge, bluray_dir):
+        bluray_analyzer = BlurayAnalyzer(ffprobe, mkvmerge)
+        with pytest.raises(AssertionError):
+            bluray_analyzer.identify_multiview_playlists(str(bluray_dir))
+
 
 class TestBlurayDisc:
     def test_bluray_playlists(self, bluray_disc):
@@ -85,6 +101,18 @@ class TestBlurayDisc:
                 bit_rate=31605890)]
 
         assert bluray_disc.playlists == expected_playlists
+
+    def test_multiview_playlists(self, bluray_disc):
+        actual_multiview_playlists = bluray_disc.multiview_playlists
+        expected_multiview_playlists = [
+            BlurayPlaylist(
+                disc=bluray_disc,
+                number=419,
+                duration=timedelta(hours=2),
+                size=33940936704,
+                bit_rate=31605890)]
+
+        assert actual_multiview_playlists == expected_multiview_playlists
 
     def test_get_movie_playlists(self, bluray_disc):
         actual_movie_playlists =\
@@ -174,3 +202,16 @@ class TestBlurayPlaylist:
 
         assert isinstance(actual_forced_subtitles, OrderedDict)
         assert actual_forced_subtitles == expected_forced_subtitles
+
+    def test_has_multiview(self, bluray_playlist):
+        assert bluray_playlist.has_multiview() == True
+
+    def test_has_no_multiview(self, bluray_disc):
+        bluray_playlist = BlurayPlaylist(
+            disc=bluray_disc,
+            number=29,
+            duration=timedelta(hours=1),
+            size=16970468352,
+            bit_rate=15802945)
+
+        assert bluray_playlist.has_multiview() == False

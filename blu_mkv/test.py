@@ -1,4 +1,5 @@
 from .ffprobe import AbstractFfprobeController
+from .makemkv import AbstractMakemkvController
 from .mkvmerge import AbstractMkvmergeController
 
 
@@ -115,3 +116,31 @@ class StubMkvmergeController(AbstractMkvmergeController):
                 },
             ],
         }
+
+
+class StubMakemkvController(AbstractMakemkvController):
+    def get_disc_info(self, source_type, source_name):
+        return {
+            'titles': {
+                0: {
+                    'source_file_name': '00029.mpls',
+                    'streams': {
+                        0: {'codec_short': "Mpeg4"},
+                        1: {'codec_short': "DD"}}},
+                1: {
+                    'source_file_name': '00419.mpls"',
+                    'streams': {
+                        0: {'codec_short': "Mpeg4"},
+                        1: {'codec_short': "Mpeg4-MVC-3D"},
+                        2: {'codec_short': "DTS"},
+                        3: {'codec_short': "DTS"},
+                        4: {'codec_short': "DTS"},
+                        5: {'codec_short': "PGS"},
+                        6: {'codec_short': "PGS"},
+                        7: {'codec_short': "PGS"}}},
+                2: {
+                    'source_file_name': '00028.mpls"',
+                    'streams': {
+                        0: {'codec_short': "Mpeg4"},
+                        1: {'codec_short': "DD"},
+                        2: {'codec_short': "PGS"}}}}}

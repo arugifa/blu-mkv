@@ -31,3 +31,10 @@ class TestBlurayAnalyzer:
             .get_subtitles_frames_count(str(bluray_path), default_playlist))
 
         assert len(frames_count) > 0
+
+    @pytest.mark.makemkv
+    def test_identify_multiview_playlists(self, bluray_analyzer, bluray_path):
+        multiview_playlists =\
+            bluray_analyzer.identify_multiview_playlists(str(bluray_path))
+
+        assert len(multiview_playlists) > 0

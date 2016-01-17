@@ -124,6 +124,11 @@ class StubMkvmergeController(AbstractMkvmergeController):
             ],
         }
 
+    def write(
+            self, output_file_path, input_tracks, title=None,
+            attachments=None):
+        pass
+
 
 class StubMakemkvController(AbstractMakemkvController):
     def get_disc_info(self, source_type, source_name):

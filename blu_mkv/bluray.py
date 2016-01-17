@@ -10,7 +10,7 @@ PLAYLISTS_RELATIVE_PATH = "BDMV/PLAYLIST"
 
 
 class BlurayAnalyzer:
-    """Bluray discs analyzer using Ffprobe and Mkvmerge command-line tools.
+    """Blu-ray disc analyzer using the Ffprobe, Mkvmerge and Makemkv programs.
 
     :param ffprobe_controller:
         interface with Ffprobe, instance of subclass of
@@ -25,9 +25,9 @@ class BlurayAnalyzer:
     def __init__(
             self, ffprobe_controller, mkvmerge_controller,
             makemkv_controller=None):
-        self.ffprobe = ffprobe_controller
-        self.mkvmerge = mkvmerge_controller
-        self.makemkv = makemkv_controller
+        self.ffprobe_controller = ffprobe_controller
+        self.mkvmerge_controller = mkvmerge_controller
+        self.makemkv_controller = makemkv_controller
 
     def get_playlists(self, disc_path):
         """Return details of playlists present on a Bluray disc by using
@@ -42,7 +42,8 @@ class BlurayAnalyzer:
         :return: a dictionary of found playlists, with their number as key
         :return type: dict
         """
-        ffprobe_analysis = self.ffprobe.get_bluray_playlists(disc_path)
+        ffprobe_analysis =\
+            self.ffprobe_controller.get_bluray_playlists(disc_path)
 
         playlists = dict()
         for playlist_number, playlist_info in ffprobe_analysis.items():
@@ -100,7 +101,7 @@ class BlurayAnalyzer:
         indices, codec types and ids are kept, as other data is not used.
         """
         ffprobe_analysis = (
-            self.ffprobe
+            self.ffprobe_controller
             .get_all_bluray_playlist_streams(disc_path, playlist_number))
 
         tracks = {
@@ -123,7 +124,8 @@ class BlurayAnalyzer:
             PLAYLISTS_RELATIVE_PATH,
             '{:05d}.mpls'.format(playlist_number))
 
-        mkvmerge_analysis = self.mkvmerge.get_file_info(str(playlist_path))
+        mkvmerge_analysis =\
+            self.mkvmerge_controller.get_file_info(str(playlist_path))
 
         tracks_language = {
             track['id']: track['properties'].get('language')
@@ -146,7 +148,7 @@ class BlurayAnalyzer:
         :return type: dict
         """
         ffprobe_analysis = (
-            self.ffprobe
+            self.ffprobe_controller
             .get_bluray_playlist_subtitles_with_frames_count(
                 disc_path, playlist_number))
 
@@ -169,11 +171,12 @@ class BlurayAnalyzer:
         :raises AssertionError: if :attr:`.makemkv` is not set (no Makemkv
                                 controller defined)
         """
-        assert self.makemkv is not None, (
+        assert self.makemkv_controller is not None, (
             "Cannot identify multiview playlists because the attribute"
-            "'makemkv' is not set")
+            "'makemkv_controller' is not set")
 
-        makemkv_analysis = self.makemkv.get_disc_info('file', disc_path)
+        makemkv_analysis =\
+            self.makemkv_controller.get_disc_info('file', disc_path)
 
         multiview_playlists = list()
         for playlist in makemkv_analysis['titles'].values():

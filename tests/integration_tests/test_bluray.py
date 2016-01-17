@@ -11,7 +11,7 @@ class TestBlurayAnalyzer:
     @pytest.mark.mkvmerge
     def test_get_playlist_tracks(self, bluray_analyzer, bluray_path):
         default_playlist = (
-            bluray_analyzer.ffprobe
+            bluray_analyzer.ffprobe_controller
             .get_default_bluray_playlist_number(bluray_path))
 
         tracks =\
@@ -23,7 +23,7 @@ class TestBlurayAnalyzer:
     @pytest.mark.ffprobe
     def test_get_subtitles_frames_count(self, bluray_analyzer, bluray_path):
         default_playlist = (
-            bluray_analyzer.ffprobe
+            bluray_analyzer.ffprobe_controller
             .get_default_bluray_playlist_number(bluray_path))
 
         frames_count = (

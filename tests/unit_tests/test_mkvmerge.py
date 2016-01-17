@@ -5,7 +5,7 @@ import pytest
 from blu_mkv.mkvmerge import MkvmergeController
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def mock_mkvmerge(mock):
     mock.patch.object(subprocess, 'check_call')
     return MkvmergeController()

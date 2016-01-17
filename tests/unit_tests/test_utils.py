@@ -14,11 +14,11 @@ def test_mount_disk_image(mock):
         ['sudo', 'mount', '-o', 'loop', image_path, mount_point])
 
 
-def test_umount_disk_image(mock):
+def test_unmount_disk_image(mock):
     mount_point = '/tmp/user/bluray'
 
     mock.patch.object(subprocess, 'check_call')
-    utils.umount_disk_image(mount_point)
+    utils.unmount_disk_image(mount_point)
 
     subprocess.check_call.assert_called_once_with(
         ['sudo', 'umount', mount_point])

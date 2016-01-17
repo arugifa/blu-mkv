@@ -15,8 +15,8 @@ def mount_disk_image(image_path, mount_point):
         mount_point])
 
 
-def umount_disk_image(mount_point):
-    """Umount file system with sudo permissions.
+def unmount_disk_image(mount_point):
+    """Unmount file system with sudo permissions.
 
     :param str mount_point: directory's path where the file system is mounted
     """

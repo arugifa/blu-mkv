@@ -65,13 +65,15 @@ class BlurayAnalyzer:
 
         :param str disc_path: path of the Bluray disc. Must points to a
                               directory
-        :return: list of found covers
+        :return: list of found covers, sorted by path
         """
         covers_path = Path(disc_path, COVERS_RELATIVE_PATH)
-        return [{
+        covers = [{
             'path': str(found_cover),
             'size': found_cover.stat().st_size,
         } for found_cover in covers_path.glob('*.jpg')]
+
+        return sorted(covers, key=lambda cover: cover['path'])
 
     def get_playlist_tracks(self, disc_path, playlist_number):
         """Return tracks' details of a specific Bluray disc's playlist

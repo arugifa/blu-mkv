@@ -5,4 +5,4 @@ python:
 install:
     - pip install -r requirements_test.txt
 
-script: python -m pytest tests/unit_tests/
+script: python -m pytest -v tests/unit_tests/

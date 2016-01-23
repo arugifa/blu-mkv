@@ -176,15 +176,15 @@ if __name__ == '__main__':
         'title',
         help="Movie title and file name for the Matroska file.")
     parser.add_argument(
-        '-p', '--playlists_count',
+        '-pc', '--playlists_count',
         type=int, default=3,
         help="Set the maximum number of playlists to convert.")
     parser.add_argument(
-        '-a', '--audio_languages',
+        '-al', '--audio_languages',
         type=str, nargs='*',
         help="Audio tracks to keep according to their language.")
     parser.add_argument(
-        '-s', '--subtitle_languages',
+        '-sl', '--subtitle_languages',
         type=str, nargs='*',
         help="Subtitle tracks to keep according to their language.")
     parser.add_argument(

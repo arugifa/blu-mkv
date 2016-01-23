@@ -8,7 +8,7 @@ from blu_mkv.mkvmerge import MkvmergeController
 @pytest.fixture
 def mock_mkvmerge(mock):
     mock.patch.object(subprocess, 'check_call')
-    return MkvmergeController()
+    return MkvmergeController(executable_file='/mkvmerge')
 
 
 class TestMkvmergeController:
@@ -26,7 +26,7 @@ class TestMkvmergeController:
         mock_mkvmerge.write('/movie.mkv', input_streams)
 
         subprocess.check_call.assert_called_once_with([
-            'mkvmerge',
+            '/mkvmerge',
             '--output', '/movie.mkv',
             '--title', '',
             '--track-order', '0:0',
@@ -102,7 +102,7 @@ class TestMkvmergeController:
             attachments=attachments)
 
         subprocess.check_call.assert_called_once_with([
-            'mkvmerge',
+            '/mkvmerge',
 
             # Global options
             '--output', '/movie.mkv',

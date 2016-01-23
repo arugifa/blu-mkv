@@ -3,6 +3,8 @@ import json
 import re
 import subprocess
 
+from . import ProgramController
+
 
 class AbstractFfprobeController(metaclass=ABCMeta):
     @abstractmethod
@@ -23,7 +25,18 @@ class AbstractFfprobeController(metaclass=ABCMeta):
         pass
 
 
-class FfprobeController(AbstractFfprobeController):
+class FfprobeController(ProgramController, AbstractFfprobeController):
+    """Interface with the Ffprobe program.
+
+    :param str executable_path: absolute path of the Ffprobe's executable file
+    """
+    def __init__(self, executable_file='ffprobe'):
+        """
+        :param str executable_file: name or absolute path of the Ffprobe's
+                                    executable file
+        """
+        super().__init__(executable_file)
+
     def get_default_bluray_playlist_number(self, disc_path):
         """Return the playlist's number used by default by Ffprobe to analyze
         a Bluray disc, when no playlist is specified on the command-line.
@@ -135,7 +148,8 @@ class FfprobeController(AbstractFfprobeController):
         :return type: an unformatted string if `json_output` is false;
                       a dictionary otherwise
         """
-        ffprobe_commandline = ['ffprobe', '-i', 'bluray:{}'.format(disc_path)]
+        ffprobe_commandline = [
+            self.executable_path, '-i', 'bluray:{}'.format(disc_path)]
         ffprobe_commandline.extend(ffprobe_options or [])
 
         if json_output is False:

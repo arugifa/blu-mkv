@@ -3,6 +3,8 @@ from enum import Enum
 import re
 import subprocess
 
+from . import ProgramController
+
 
 class ItemAttribute(Enum):
     """Information returned by Makemkv during analysis of a Blu-ray disc, for
@@ -66,7 +68,19 @@ class AbstractMakemkvController(metaclass=ABCMeta):
         pass
 
 
-class MakemkvController(AbstractMakemkvController):
+class MakemkvController(ProgramController, AbstractMakemkvController):
+    """Interface with the Makemkv program.
+
+    :param str executable_path: absolute path of the Makemkv command-line's
+                                executable file
+    """
+    def __init__(self, executable_file='makemkvcon'):
+        """
+        :param str executable_file: name or absolute path of the Makemkv
+                                    command-line's executable
+        """
+        super().__init__(executable_file)
+
     def get_disc_info(self, source_type, source_name):
         """Return details about a Blu-ray disc.
 
@@ -85,7 +99,7 @@ class MakemkvController(AbstractMakemkvController):
         :rtype: dict
         """
         makemkv_output = subprocess.check_output([
-            'makemkvcon',
+            self.executable_path,
             '-r', 'info',
             '{}:{}'.format(source_type, source_name)],
             universal_newlines=True)

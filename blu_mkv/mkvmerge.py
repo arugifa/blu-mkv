@@ -3,6 +3,8 @@ from collections import OrderedDict
 import json
 import subprocess
 
+from . import ProgramController
+
 
 class AbstractMkvmergeController(metaclass=ABCMeta):
     @abstractmethod
@@ -16,7 +18,18 @@ class AbstractMkvmergeController(metaclass=ABCMeta):
         pass
 
 
-class MkvmergeController(AbstractMkvmergeController):
+class MkvmergeController(ProgramController, AbstractMkvmergeController):
+    """Interface with the Mkvmerge program.
+
+    :param str executable_path: absolute path of the Mkvmerge's executable file
+    """
+    def __init__(self, executable_file='mkvmerge'):
+        """
+        :param str executable_file: name or absolute path of the Mkvmerge's
+                                    executable file
+        """
+        super().__init__(executable_file)
+
     def get_file_info(self, file_path):
         """Return details about a media file.
 
@@ -28,7 +41,7 @@ class MkvmergeController(AbstractMkvmergeController):
         :rtype: dict
         """
         mkvmerge_output = subprocess.check_output([
-            'mkvmerge',
+            self.executable_path,
             '--identify',
             '--identification-format', 'json',
             file_path],
@@ -77,7 +90,7 @@ class MkvmergeController(AbstractMkvmergeController):
         # Command-line options for Mkvmerge must be ordered in a specific way.
         # Global options are defined at first.
         mkvmerge_commandline = [
-            'mkvmerge',
+            self.executable_path,
             '--output', output_file_path,
             '--title', title or '']
 

@@ -49,26 +49,32 @@ def main(args):
         movie_playlists = bluray_disc.get_movie_playlists()
         movie_playlists_count = len(movie_playlists)
         print("Found {} movie playlist(s)".format(movie_playlists_count))
-        if len(movie_playlists) > args.playlists_count:
+        if (args.playlists_count and
+                movie_playlists_count > args.playlists_count):
             sys.exit(
                 "Only {} playlist(s) can be converted. "
                 "Consider increasing the value for the '--playlists_count' "
                 "option".format(args.playlists_count))
 
         for playlist in bluray_disc.get_movie_playlists():
-            if playlist.has_multiview:
+            print("Start analysis of playlist {}".format(playlist.number))
+
+            if playlist.has_multiview():
                 print(
                     "Skip playlist {}: "
                     "conversion of 3D playlists is currently not supported"
                     .format(playlist.number))
                 continue
-            print("Start analysis of playlist {}".format(playlist.number))
 
             # Only the biggest disc cover is kept.
-            attachments = [{
-                'type': 'jpeg',
-                'name': 'cover.jpg',
-                'path': bluray_disc.get_biggest_cover()['path']}]
+            cover_art = bluray_disc.get_biggest_cover()
+            if cover_art is not None:
+                attachments = [{
+                    'type': 'jpeg',
+                    'name': 'cover.jpg',
+                    'path': cover_art['path']}]
+            else:
+                attachments = None
 
             mkv_tracks = []
             # Video tracks are kept unchanged.
@@ -81,9 +87,12 @@ def main(args):
                         'default': True if count == 0 else False}})
 
             # Audio tracks are filtered/sorted by language.
-            audio_filters = dict()
-            if args.audio_languages is not None:
-                audio_filters['language_code'] = args.audio_languages
+            #  Multi-languages tracks are always kept, as it is not possible to
+            #  know which languages they contain. The same behavior is applied
+            #  for tracks with undetermined language.
+            audio_filters = {'language_code': ["mis", "mul", "und"]}
+            if args.audio_languages:
+                audio_filters['language_code'].extend(args.audio_languages)
 
             audio_tracks = helpers.filter_tracks(
                 playlist.audio_tracks, **audio_filters)
@@ -100,7 +109,7 @@ def main(args):
 
             # Subtitle tracks are filtered/sorted by language.
             subtitle_filters = dict()
-            if args.subtitle_languages is not None:
+            if args.subtitle_languages:
                 subtitle_filters['language_code'] = args.subtitle_languages
 
             subtitle_tracks = helpers.filter_tracks(
@@ -118,7 +127,7 @@ def main(args):
                     forced_flag = True
                     # Forced subtitles are tagged to be easily identified on
                     # media players which do not display forced flags.
-                    track_name = args.forced_subtitles_name or ''
+                    track_name = args.forced_subtitle_names or ''
                 else:
                     forced_flag = False
                     track_name = ''
@@ -178,11 +187,16 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pc', '--playlists_count',
         type=int, default=3,
-        help="Set the maximum number of playlists to convert.")
+        help=(
+            "Set the maximum number of movie playlists to convert. "
+            "Defaults to 3. If set to 0, all movie playlists are converted."))
     parser.add_argument(
         '-al', '--audio_languages',
         type=str, nargs='*',
-        help="Audio tracks to keep according to their language.")
+        help=(
+            "Audio tracks to keep according to their language. "
+            "Multi-languages tracks or tracks with undetermined language are "
+            "always kept."))
     parser.add_argument(
         '-sl', '--subtitle_languages',
         type=str, nargs='*',

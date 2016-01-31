@@ -174,7 +174,7 @@ class BlurayAnalyzer:
                                 controller defined)
         """
         assert self.makemkv_controller is not None, (
-            "Cannot identify multiview playlists because the attribute"
+            "Cannot identify multiview playlists because the attribute "
             "'makemkv_controller' is not set")
 
         makemkv_analysis =\

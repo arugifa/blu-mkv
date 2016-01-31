@@ -176,14 +176,14 @@ if __name__ == '__main__':
             "Convert a Blu-ray disc to Matroska file."
             "Use Ffprobe, Mkvmerge and optionally Makemkv for 3D support."))
     parser.add_argument(
+        'title',
+        help="Movie title and file name for the Matroska file.")
+    parser.add_argument(
         'src_disc',
         help="Blu-ray source. Can be a disk image or directory.")
     parser.add_argument(
         'dst_dir',
         help="Destination directory for the Matroska file.")
-    parser.add_argument(
-        'title',
-        help="Movie title and file name for the Matroska file.")
     parser.add_argument(
         '-pc', '--playlists_count',
         type=int, default=3,

@@ -403,6 +403,9 @@ class BlurayPlaylist:
             self.disc.bluray_analyzer
             .get_subtitles_frames_count(self.disc.path, self.number))
 
+        if not subtitles_frames_count:
+            return OrderedDict()
+
         biggest_subtitle = max(subtitles_frames_count.values())
         frames_limit = frames_count_factor * biggest_subtitle
 

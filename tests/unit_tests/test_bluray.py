@@ -197,6 +197,25 @@ class TestBlurayPlaylist:
         assert isinstance(actual_forced_subtitles, OrderedDict)
         assert actual_forced_subtitles == expected_forced_subtitles
 
+    def test_get_forced_subtitles_when_there_are_no_subtitles(
+            self, ffprobe, mkvmerge, bluray_dir):
+
+        class TestBlurayAnalyzer(BlurayAnalyzer):
+            def get_subtitles_frames_count(self, disc_path, playlist_number):
+                return dict()
+
+        bluray_analyzer = TestBlurayAnalyzer(ffprobe, mkvmerge)
+        bluray_disc = BlurayDisc(str(bluray_dir), bluray_analyzer)
+        bluray_playlist = BlurayPlaylist(
+            disc=bluray_disc,
+            number=29,
+            duration=timedelta(hours=1),
+            size=16970468352)
+
+        forced_subtitles = bluray_playlist.get_forced_subtitles()
+        assert isinstance(forced_subtitles, OrderedDict)
+        assert forced_subtitles == OrderedDict()
+
     def test_has_multiview(self, bluray_playlist):
         assert bluray_playlist.has_multiview() is True
 

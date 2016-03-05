@@ -50,7 +50,6 @@ class BlurayAnalyzer:
             playlist_duration = float(playlist_info['duration'])
 
             playlists[playlist_number] = {
-                'bit_rate': int(playlist_info['bit_rate']),
                 'duration': timedelta(seconds=playlist_duration),
                 'size': int(playlist_info['size'])}
 
@@ -225,8 +224,7 @@ class BlurayDisc:
                 disc=self,
                 number=playlist_number,
                 duration=playlist_info['duration'],
-                size=playlist_info['size'],
-                bit_rate=playlist_info['bit_rate'])
+                size=playlist_info['size'])
 
             if playlist not in playlists:
                 playlists.append(playlist)
@@ -308,23 +306,20 @@ class BlurayPlaylist:
     :param duration: playlist's duration,
                      instance of :class:`~datetime.timedelta`
     :param int size: playlist's size in bytes
-    :param int bit_rate: playlist's bit rate in bytes per second
     :param str path: playlist's path
     """
-    def __init__(self, disc, number, duration, size, bit_rate):
+    def __init__(self, disc, number, duration, size):
         self.disc = disc
         self.number = number
         self.duration = duration
         self.size = size
-        self.bit_rate = bit_rate
         self.path = str(PurePath(
             disc.path, PLAYLISTS_RELATIVE_PATH, "{:05d}.mpls".format(number)))
 
     def __eq__(self, other):
         return (self.disc == other.disc and
                 self.duration == other.duration and
-                self.size == other.size and
-                self.bit_rate == other.bit_rate)
+                self.size == other.size)
 
     @staticmethod
     def _sort_tracks(tracks):

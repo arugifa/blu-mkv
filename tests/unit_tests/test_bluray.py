@@ -11,19 +11,15 @@ class TestBlurayAnalyzer:
         actual_playlists = bluray_analyzer.get_playlists(str(bluray_dir))
         expected_playlists = {
             28: {
-                'bit_rate': 15802940,
                 'duration': timedelta(minutes=59, seconds=59),
                 'size': 16970468350},
             29: {
-                'bit_rate': 15802945,
                 'duration': timedelta(hours=1),
                 'size': 16970468352},
             419: {
-                'bit_rate': 31605890,
                 'duration': timedelta(hours=2),
                 'size': 33940936704},
             420: {
-                'bit_rate': 31605890,
                 'duration': timedelta(hours=2),
                 'size': 33940936704}}
 
@@ -85,20 +81,17 @@ class TestBlurayDisc:
                 disc=bluray_disc,
                 number=28,
                 duration=timedelta(minutes=59, seconds=59),
-                size=16970468350,
-                bit_rate=15802940),
+                size=16970468350),
             BlurayPlaylist(
                 disc=bluray_disc,
                 number=29,
                 duration=timedelta(hours=1),
-                size=16970468352,
-                bit_rate=15802945),
+                size=16970468352),
             BlurayPlaylist(
                 disc=bluray_disc,
                 number=419,
                 duration=timedelta(hours=2),
-                size=33940936704,
-                bit_rate=31605890)]
+                size=33940936704)]
 
         assert bluray_disc.playlists == expected_playlists
 
@@ -109,8 +102,7 @@ class TestBlurayDisc:
                 disc=bluray_disc,
                 number=419,
                 duration=timedelta(hours=2),
-                size=33940936704,
-                bit_rate=31605890)]
+                size=33940936704)]
 
         assert actual_multiview_playlists == expected_multiview_playlists
 
@@ -123,14 +115,12 @@ class TestBlurayDisc:
                 disc=bluray_disc,
                 number=29,
                 duration=timedelta(hours=1),
-                size=16970468352,
-                bit_rate=15802945),
+                size=16970468352),
             BlurayPlaylist(
                 disc=bluray_disc,
                 number=419,
                 duration=timedelta(hours=2),
-                size=33940936704,
-                bit_rate=31605890)]
+                size=33940936704)]
 
         assert actual_movie_playlists == expected_movie_playlists
 
@@ -162,7 +152,6 @@ class TestBlurayPlaylist:
                 number=playlist_number,
                 duration=timedelta(hours=2),
                 size=20000000000,
-                bit_rate=30000000,
             ) for playlist_number in range(2)]
         assert playlists[0] == playlists[1]
 
@@ -204,14 +193,13 @@ class TestBlurayPlaylist:
         assert actual_forced_subtitles == expected_forced_subtitles
 
     def test_has_multiview(self, bluray_playlist):
-        assert bluray_playlist.has_multiview() == True
+        assert bluray_playlist.has_multiview() is True
 
     def test_has_no_multiview(self, bluray_disc):
         bluray_playlist = BlurayPlaylist(
             disc=bluray_disc,
             number=29,
             duration=timedelta(hours=1),
-            size=16970468352,
-            bit_rate=15802945)
+            size=16970468352)
 
-        assert bluray_playlist.has_multiview() == False
+        assert bluray_playlist.has_multiview() is False

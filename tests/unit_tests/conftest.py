@@ -37,5 +37,4 @@ def bluray_playlist(bluray_disc):
         disc=bluray_disc,
         number=419,
         duration=timedelta(hours=2),
-        size=33940936704,
-        bit_rate=31605890)
+        size=33940936704)

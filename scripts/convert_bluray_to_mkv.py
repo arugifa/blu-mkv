@@ -61,7 +61,7 @@ def main(args):
                 bluray_disc.get_movie_playlists(), start=1):
             print("Start analysis of playlist {}".format(playlist.number))
 
-            if playlist.has_multiview():
+            if args.detect_3d is True and playlist.has_multiview():
                 print(
                     "Skip playlist {}: "
                     "conversion of 3D playlists is currently not supported"

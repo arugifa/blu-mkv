@@ -271,6 +271,9 @@ class BlurayDisc:
         :param float duration_factor: used to identify movie playlists
         :rtype: list
         """
+        if not self.playlists:
+            return []
+
         longest_playlist = max(
             self.playlists, key=lambda playlist: playlist.duration)
         duration_limit = duration_factor * longest_playlist.duration

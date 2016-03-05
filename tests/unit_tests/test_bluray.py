@@ -129,6 +129,19 @@ class TestBlurayDisc:
 
         assert actual_movie_playlists == expected_movie_playlists
 
+    def test_get_movie_playlists_when_there_are_no_playlists(
+            self, ffprobe, mkvmerge, bluray_dir):
+
+        class TestBlurayAnalyzer(BlurayAnalyzer):
+            def get_playlists(self, disc_path):
+                return dict()
+
+        bluray_analyzer = TestBlurayAnalyzer(ffprobe, mkvmerge)
+        bluray_disc = BlurayDisc(str(bluray_dir), bluray_analyzer)
+
+        movie_playlists = bluray_disc.get_movie_playlists()
+        assert movie_playlists == []
+
     def test_bluray_covers(self, bluray_disc, bluray_covers):
         expected_covers = [
             {'path': str(cover), 'size': cover.size()}

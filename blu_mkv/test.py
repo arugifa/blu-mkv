@@ -13,10 +13,12 @@ class StubFfprobeController(AbstractFfprobeController):
 
         return max(
             sorted_playlists,
-            key=lambda number: sorted_playlists[number]['duration'])
+            key=lambda number: sorted_playlists[number].get('duration', '0'))
 
     def get_bluray_playlists(self, disc_path):
         return {
+            0: {
+                'size': "1394716825"},
             28: {
                 'duration': "3599.000000",
                 'size': "16970468350"},

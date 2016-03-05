@@ -7,7 +7,12 @@ from blu_mkv.bluray import BlurayAnalyzer, BlurayDisc, BlurayPlaylist
 
 
 class TestBlurayAnalyzer:
-    def test_get_playlists(self, bluray_analyzer, bluray_dir):
+    def test_get_playlists(self, bluray_analyzer, bluray_dir, ffprobe):
+        # Playlist 0 is returned by Ffprobe, but skipped by the Blu-ray
+        # analyzer because it has no duration.
+        ffprobe_analysis = ffprobe.get_bluray_playlists(str(bluray_dir))
+        assert sorted(ffprobe_analysis) == [0, 28, 29, 419, 420]
+
         actual_playlists = bluray_analyzer.get_playlists(str(bluray_dir))
         expected_playlists = {
             28: {

@@ -37,6 +37,8 @@ class BlurayAnalyzer:
         - duration: playlist duration, instance of :class:`datetime.timedelta`,
         - size: ``int``, playlist size in bytes.
 
+        Playlists found without duration are skipped.
+
         :param str disc_path: path of the Bluray disc. Must points to a
                               directory
         :return: a dictionary of found playlists, with their number as key
@@ -47,6 +49,9 @@ class BlurayAnalyzer:
 
         playlists = dict()
         for playlist_number, playlist_info in ffprobe_analysis.items():
+            playlist_duration = playlist_info.get('duration')
+            if playlist_duration is None:
+                continue
             playlist_duration = float(playlist_info['duration'])
 
             playlists[playlist_number] = {

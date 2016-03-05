@@ -4,6 +4,7 @@ import re
 import subprocess
 
 from . import ProgramController
+from .exceptions import ControllerError
 
 
 class ItemAttribute(Enum):
@@ -98,11 +99,14 @@ class MakemkvController(ProgramController, AbstractMakemkvController):
         :param str source_name: path or identifier of the disc
         :rtype: dict
         """
-        makemkv_output = subprocess.check_output([
-            self.executable_path,
-            '-r', 'info',
-            '{}:{}'.format(source_type, source_name)],
-            universal_newlines=True)
+        try:
+            makemkv_output = subprocess.check_output([
+                self.executable_path,
+                '-r', 'info',
+                '{}:{}'.format(source_type, source_name)],
+                universal_newlines=True)
+        except subprocess.CalledProcessError as exc:
+            raise ControllerError(exc.stdout.splitlines()[-1]) from exc
 
         # Regex for lines related to titles. Example: TINFO:0,8,0,"22"
         title_regex = re.compile(

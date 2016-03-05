@@ -1,20 +1,9 @@
-from collections import OrderedDict
-
 from .ffprobe import AbstractFfprobeController
 from .makemkv import AbstractMakemkvController
 from .mkvmerge import AbstractMkvmergeController
 
 
 class StubFfprobeController(AbstractFfprobeController):
-    def get_default_bluray_playlist_number(self, disc_path):
-        sorted_playlists = OrderedDict(sorted(
-            self.get_bluray_playlists(disc_path).items(),
-            key=lambda playlist: playlist[0]))
-
-        return max(
-            sorted_playlists,
-            key=lambda number: sorted_playlists[number].get('duration', '0'))
-
     def get_bluray_playlists(self, disc_path):
         return {
             0: {

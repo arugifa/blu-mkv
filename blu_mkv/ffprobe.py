@@ -8,10 +8,6 @@ from . import ProgramController
 
 class AbstractFfprobeController(metaclass=ABCMeta):
     @abstractmethod
-    def get_default_bluray_playlist_number(self, disc_path):
-        pass
-
-    @abstractmethod
     def get_bluray_playlists(self, disc_path):
         pass
 

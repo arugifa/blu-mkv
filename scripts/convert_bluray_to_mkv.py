@@ -46,6 +46,7 @@ def main(args):
         bluray_disc = bluray.BlurayDisc(bluray_path, bluray_analyzer)
 
         # Convert all movie playlists (not bonuses) found on the disc.
+        print("Start disc analysis")
         movie_playlists = bluray_disc.get_movie_playlists()
         movie_playlists_count = len(movie_playlists)
         print("Found {} movie playlist(s)".format(movie_playlists_count))
@@ -56,7 +57,8 @@ def main(args):
                 "Consider increasing the value for the '--playlists_count' "
                 "option".format(args.playlists_count))
 
-        for playlist in bluray_disc.get_movie_playlists():
+        for (playlist_count, playlist) in enumerate(
+                bluray_disc.get_movie_playlists(), start=1):
             print("Start analysis of playlist {}".format(playlist.number))
 
             if playlist.has_multiview():
@@ -78,13 +80,13 @@ def main(args):
 
             mkv_tracks = []
             # Video tracks are kept unchanged.
-            for (count, track_id) in enumerate(playlist.video_tracks):
+            for (track_count, track_id) in enumerate(playlist.video_tracks):
                 mkv_tracks.append({
                     'file_path': playlist.path,
                     'id': track_id,
                     'type': 'video',
                     'properties': {
-                        'default': True if count == 0 else False}})
+                        'default': True if track_count == 0 else False}})
 
             # Audio tracks are filtered/sorted by language.
             #  Multi-languages tracks are always kept, as it is not possible to
@@ -141,13 +143,17 @@ def main(args):
                         'forced': forced_flag,
                         'name': track_name}})
 
-            mkv_file_name =\
-                str(destination_directory / "{}.mkv".format(args.title))
+            if movie_playlists_count > 1:
+                mkv_file_name =\
+                    "{} - {}.mkv".format(args.title, playlist_count)
+            else:
+                mkv_file_name = "{}.mkv".format(args.title)
+            mkv_file_path = str(destination_directory / mkv_file_name)
 
             # Convert the playlist with Mkvmerge.
             print("Convert playlist {}".format(playlist.number))
             bluray_analyzer.mkvmerge_controller.write(
-                mkv_file_name,
+                mkv_file_path,
                 mkv_tracks,
                 title=args.title,
                 attachments=attachments)

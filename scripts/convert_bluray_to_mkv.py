@@ -186,10 +186,10 @@ if __name__ == '__main__':
         help="Destination directory for the Matroska file.")
     parser.add_argument(
         '-pc', '--playlists_count',
-        type=int, default=3,
+        type=int, default=1,
         help=(
             "Set the maximum number of movie playlists to convert. "
-            "Defaults to 3. If set to 0, all movie playlists are converted."))
+            "Defaults to 1. If set to 0, all movie playlists are converted."))
     parser.add_argument(
         '-al', '--audio_languages',
         type=str, nargs='*',

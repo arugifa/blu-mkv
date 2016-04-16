@@ -119,17 +119,6 @@ class FfprobeController(ProgramController, AbstractFfprobeController):
         return self._analyze_bluray_disc(
             disc_path, ffprobe_options, json_output=True)['streams']
 
-    @staticmethod
-    def _clean_formatted_output(ffprobe_output):
-        """Delete insignificant error messages appearing in ffprobe's output.
-
-        These errors can make unusable outputs using special formats like JSON
-        or CSV. Only one error (about missing JVM libary for BD-J) is handled
-        for the moment.
-        """
-        return re.sub(r'bdj.c:\d+: BD-J check: Failed to load JVM library\n',
-                      r'', ffprobe_output, count=1)
-
     def _analyze_bluray_disc(
             self, disc_path, ffprobe_options=None, json_output=False):
         """Analyze a Bluray disc by using Ffprobe command-line tool.
@@ -157,7 +146,9 @@ class FfprobeController(ProgramController, AbstractFfprobeController):
             ffprobe_commandline.extend([
                 '-loglevel', 'quiet',
                 '-print_format', 'json'])
+
             ffprobe_output = subprocess.check_output(
                 ffprobe_commandline,
                 universal_newlines=True)
-            return json.loads(self._clean_formatted_output(ffprobe_output))
+
+            return json.loads(ffprobe_output)

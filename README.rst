@@ -37,6 +37,7 @@ In order to use **Blu-MKV**, you have to install first:
 - Python >= 3.4
 - Mkvmerge >= 8.7
 - Ffprobe >= 2.8
+- OpenJDK 7, for analyzing discs with BD-J content
 - sudo, for mounting/unmounting disk images
 
 Optionally, if you want to add support for 3D titles, you also need:
@@ -87,7 +88,7 @@ Each time you will want to convert a Blu-ray disc, you have to enable the Python
 System Configuration
 --------------------
 
-You need to have the permissions to mount and unmount file systems if you plan to convert Blu-ray discs stored into disk images. For example, add these lines to the sudoers file::
+You need to have the permissions to mount and unmount file systems if you plan to convert Blu-ray discs stored into disk images. For example, add these lines to your sudoers file::
 
     Cmnd_Alias MOUNT = /usr/bin/mount, /usr/bin/umount
     your_username ALL=(ALL) NOPASSWD: MOUNT

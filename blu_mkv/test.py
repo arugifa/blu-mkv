@@ -4,7 +4,7 @@ from .mkvmerge import AbstractMkvmergeController
 
 
 class StubFfprobeController(AbstractFfprobeController):
-    def get_bluray_playlists(self, disc_path):
+    def get_playlists(self, disc_path):
         return {
             0: {
                 'size': "1394716825"},
@@ -21,7 +21,7 @@ class StubFfprobeController(AbstractFfprobeController):
                 'duration': "7200.000000",
                 'size': "33940936704"}}
 
-    def get_all_bluray_playlist_streams(self, disc_path, playlid_id):
+    def get_playlist_streams(self, disc_path, playlid_id):
         return [
             {'index': 0, 'codec_type': "video", 'id': "0x1011"},
             {'index': 1, 'codec_type': "audio", 'id': "0x1100"},
@@ -31,8 +31,7 @@ class StubFfprobeController(AbstractFfprobeController):
             {'index': 5, 'codec_type': "subtitle", 'id': "0x1201"},
             {'index': 6, 'codec_type': "subtitle", 'id': "0x1202"}]
 
-    def get_bluray_playlist_subtitles_with_frames_count(
-            self, disc_path, playlist_id):
+    def get_playlist_subtitles_with_frames_count(self, disc_path, playlist_id):
         return [
             {'index': 4, 'nb_read_frames': "999"},
             {'index': 5, 'nb_read_frames': "1000"},

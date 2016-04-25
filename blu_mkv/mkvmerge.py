@@ -13,8 +13,7 @@ class AbstractMkvmergeController(metaclass=ABCMeta):
 
     @abstractmethod
     def write(
-            self, output_file_path, input_tracks, title=None,
-            attachments=None):
+            self, output_file, input_tracks, title=None, attachments=None):
         pass
 
 
@@ -50,8 +49,8 @@ class MkvmergeController(ProgramController, AbstractMkvmergeController):
         return json.loads(mkvmerge_output)
 
     def write(
-            self, output_file_path, input_streams, title=None,
-            attachments=None):
+            self, output_file, input_files, tracks_order, title=None,
+            external_attachments=None):
         """Remux several streams into a Matroska file.
 
         Each stream is a dictionary with following information:
@@ -76,7 +75,7 @@ class MkvmergeController(ProgramController, AbstractMkvmergeController):
                 how to name attachments according to their size
         - path: `str`, path of the original attachment
 
-        :param str output_file_path: the Matroska file's path
+        :param str output_file: the Matroska file's path
         :param input_streams: list of dictionaries, streams to remux into the
                               Matroska file
         :param str title: title of the Matroska file (e.g., movie name)
@@ -84,62 +83,36 @@ class MkvmergeController(ProgramController, AbstractMkvmergeController):
                             Matroska file
         :raises AssertionError: if ``input_streams`` is empty
         """
-        assert input_streams, \
-            "The 'input_streams' argument cannot be an empty list"
+        assert input_files, \
+            "The 'input_files' argument cannot be an empty list"
+
+        input_files = OrderedDict(
+            sorted(input_files.items(), key=lambda input_file: input_file[0]))
 
         # Command-line options for Mkvmerge must be ordered in a specific way.
         # Global options are defined at first.
         mkvmerge_commandline = [
             self.executable_path,
-            '--output', output_file_path,
+            '--output', output_file,
             '--title', title or '']
 
-        if attachments:
-            mkvmerge_commandline.extend(self._add_attachments(attachments))
-
-        # Streams' options are grouped together, according to their source
-        # file, and their original order is memorized. They will be added
-        # further to the command-line.
-        (grouped_streams, streams_order) =\
-            self._group_input_streams_by_source_file(input_streams)
-
-        # Streams' order belongs also to global options.
-        mkvmerge_commandline.extend(self._set_streams_order(streams_order))
-
-        # Options related to input streams are at last added to the
-        # command-line.
-        for (source_file_id, (source_file_path, streams)) in enumerate(grouped_streams.items()):  # noqa
+        if external_attachments:
             mkvmerge_commandline.extend(
-                self._add_streams(source_file_id, source_file_path, streams))
+                self._add_external_attachments(external_attachments))
+
+        self._set_tracks_order(tracks_order, input_files)
+
+        for (count, file_path) in enumerate(input_files):
+            file_options = self._set_input_file_options(
+                count, file_path, input_files[file_path])
+            mkvmerge_commandline.extend(file_options)
 
         # And the complete command-line is executed.
         subprocess.check_call(mkvmerge_commandline)
 
     @staticmethod
-    def _group_input_streams_by_source_file(input_streams):
-        """Group input streams by source file, while memorizing their original
-        order."""
-        streams_order = []
-        grouped_streams = OrderedDict()
-
-        for stream in input_streams:
-            source_files = list(grouped_streams.keys())
-            source_file_path = stream['file_path']
-            try:
-                source_file_id = source_files.index(source_file_path)
-            except ValueError:
-                source_file_id = len(source_files)
-                grouped_streams[source_file_path] = list()
-
-            streams_order.append((source_file_id, stream['id']))
-            grouped_streams[source_file_path].append(stream)
-
-        return (grouped_streams, streams_order)
-
-    @staticmethod
-    def _add_attachments(attachments):
-        """Return command-line options to add attachments to a Matroska
-        file."""
+    def _add_external_attachments(attachments):
+        "Return command-line options to add external attachments."
         mkvmerge_options = list()
 
         for attachment in attachments:
@@ -151,42 +124,43 @@ class MkvmergeController(ProgramController, AbstractMkvmergeController):
         return mkvmerge_options
 
     @staticmethod
-    def _set_streams_order(streams_order):
-        """Return command-line option to set streams order in a Matroska
-        file."""
+    def _set_tracks_order(tracks_order, input_files):
+        "Return command-line option to set streams order."
+        input_file_paths = list(input_files)
+
         return [
             '--track-order',
             ','.join(
-                '{}:{}'.format(source_file_id, stream_id)
-                for (source_file_id, stream_id) in streams_order)]
+                '{}:{}'.format(input_file_paths.index(input_file), track_id)
+                for (input_file, track_id) in tracks_order)]
 
     @staticmethod
-    def _add_streams(source_file_id, source_file_path, input_streams):
-        """Return command-line options to add input streams to a Matroska
-        file."""
+    def _set_input_file_options(file_id, file_path, file_items):
+        "Return command-line options specific to an input file."
         mkvmerge_options = list()
 
-        stream_types = {
+        tracks_options = {
             'audio': list(),
-            'subtitle': list(),
+            'subtitles': list(),
             'video': list()}
 
-        for stream in input_streams:
-            default_flag = 1 if stream['properties'].get('default') else 0
-            forced_flag = 1 if stream['properties'].get('forced') else 0
-            track_name = stream['properties'].get('name', '')
+        for track in file_items['tracks']:
+            default_flag = 1 if track['properties'].get('default') else 0
+            forced_flag = 1 if track['properties'].get('forced') else 0
+            track_name = track['properties'].get('name', '')
 
             mkvmerge_options.extend([
-                '--default-track', '{}:{}'.format(stream['id'], default_flag),
-                '--forced-track', '{}:{}'.format(stream['id'], forced_flag),
-                '--track-name', '{}:{}'.format(stream['id'], track_name)])
+                '--default-track', '{}:{}'.format(track['id'], default_flag),
+                '--forced-track', '{}:{}'.format(track['id'], forced_flag),
+                '--track-name', '{}:{}'.format(track['id'], track_name)])
 
-            stream_types[stream['type']].append(str(stream['id']))
+            tracks_options[track['type']].append(str(track['id']))
 
         mkvmerge_options.extend([
-            '--audio-tracks', ','.join(stream_types['audio']),
-            '--subtitle-tracks', ','.join(stream_types['subtitle']),
-            '--video-tracks', ','.join(stream_types['video']),
-            source_file_path])
+            '--audio-tracks', ','.join(tracks_options['audio']),
+            '--subtitle-tracks', ','.join(tracks_options['subtitles']),
+            '--video-tracks', ','.join(tracks_options['video']),
+            '--attachments', ','.join(map(str, file_items['attachments'])),
+            file_path])
 
         return mkvmerge_options
